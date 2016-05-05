@@ -12,14 +12,24 @@ import Keys
 import ReactiveCocoa
 import Result
 
-public enum GitService: String {
-    case GitHub = "github"
-    case BitBucket = "bitbucket"
+public enum GitService {
+    case GitHub
+    case EnterpriseGitHub(host: String)
+    case BitBucket
 //    case GitLab = "gitlab"
-    
+
+    public func type() -> String {
+        switch self {
+        case .GitHub: return "github"
+        case .EnterpriseGitHub: return "enterprisegithub"
+        case .BitBucket: return "bitbucket"
+        }
+    }
+
     public func prettyName() -> String {
         switch self {
         case .GitHub: return "GitHub"
+        case .EnterpriseGitHub: return "EnterpriseGitHub"
         case .BitBucket: return "BitBucket"
         }
     }
@@ -27,6 +37,7 @@ public enum GitService: String {
     public func logoName() -> String {
         switch self {
         case .GitHub: return "github"
+        case .EnterpriseGitHub: return "enterprisegithub"
         case .BitBucket: return "bitbucket"
         }
     }
@@ -41,6 +52,7 @@ public enum GitService: String {
     public func authorizeUrl() -> String {
         switch self {
         case .GitHub: return "https://github.com/login/oauth/authorize"
+        case .EnterpriseGitHub: assert(false)
         case .BitBucket: return "https://bitbucket.org/site/oauth2/authorize"
         }
     }
@@ -48,6 +60,7 @@ public enum GitService: String {
     public func accessTokenUrl() -> String {
         switch self {
         case .GitHub: return "https://github.com/login/oauth/access_token"
+        case .EnterpriseGitHub: assert(false)
         case .BitBucket: return "https://bitbucket.org/site/oauth2/access_token"
         }
     }
@@ -55,6 +68,7 @@ public enum GitService: String {
     public func serviceKey() -> String {
         switch self {
         case .GitHub: return BuildasaurKeys().gitHubAPIClientId()
+        case .EnterpriseGitHub: assert(false)
         case .BitBucket: return BuildasaurKeys().bitBucketAPIClientId()
         }
     }
@@ -62,6 +76,7 @@ public enum GitService: String {
     public func serviceSecret() -> String {
         switch self {
         case .GitHub: return BuildasaurKeys().gitHubAPIClientSecret()
+        case .EnterpriseGitHub: assert(false)
         case .BitBucket: return BuildasaurKeys().bitBucketAPIClientSecret()
         }
     }
