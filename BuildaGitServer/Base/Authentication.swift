@@ -40,9 +40,21 @@ extension ProjectAuthenticator: KeychainStringSerializable {
         
         let comps = value.componentsSeparatedByString(":")
         guard comps.count >= 4 else { throw Error.withInfo("Corrupted keychain string") }
-        guard let service = GitService(rawValue: comps[0]) else {
-            throw Error.withInfo("Unsupported service: \(comps[0])")
+
+        var service: GitService
+        switch comps[0] {
+        case GitService.GitHub.hostname():
+            service = GitService.GitHub
+        case GitService.BitBucket.hostname():
+            service = GitService.BitBucket
+        default:
+            let host = comps[0]
+            guard let maybeService = createEnterpriseService(host) else {
+                throw Error.withInfo("Unsupported service: \(host)")
+            }
+            service = maybeService
         }
+
         guard let type = ProjectAuthenticator.AuthType(rawValue: comps[2]) else {
             throw Error.withInfo("Unsupported auth type: \(comps[2])")
         }
@@ -55,10 +67,23 @@ extension ProjectAuthenticator: KeychainStringSerializable {
     public func toString() -> String {
         
         return [
-            self.service.rawValue,
+            self.service.hostname(),
             self.username,
             self.type.rawValue,
             self.secret
             ].joinWithSeparator(":")
+    }
+
+    internal static func createEnterpriseService(host: String) -> GitService? {
+        guard let url = NSURL(string: "http://\(host)/setup/api/settings")
+            else { return nil }
+        do {
+            let response = try NSString(contentsOfURL: url, encoding: NSASCIIStringEncoding)
+            if response.lowercaseString.containsString("not authorized") {
+                return GitService.EnterpriseGitHub(host: host)
+            }
+        } catch {
+        }
+        return nil
     }
 }
