@@ -2,7 +2,7 @@
 //  AuthenticationTests.swift
 //  Buildasaur
 //
-//  Created by Rachel Caileff on 5/5/16.
+//  Created by Rachel Caileff on 3/14/16.
 //  Copyright © 2016 Honza Dvorsky. All rights reserved.
 //
 

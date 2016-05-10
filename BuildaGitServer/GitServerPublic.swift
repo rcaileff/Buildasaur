@@ -45,6 +45,7 @@ public enum GitService {
     public func hostname() -> String {
         switch self {
         case .GitHub: return "github.com"
+        case .EnterpriseGitHub(let host): return host
         case .BitBucket: return "bitbucket.org"
         }
     }
@@ -68,16 +69,16 @@ public enum GitService {
     public func serviceKey() -> String {
         switch self {
         case .GitHub: return BuildasaurxcodeprojKeys().gitHubAPIClientId()
-        case .BitBucket: return BuildasaurxcodeprojKeys().bitBucketAPIClientId()
         case .EnterpriseGitHub: assert(false)
+        case .BitBucket: return BuildasaurxcodeprojKeys().bitBucketAPIClientId()
         }
     }
     
     public func serviceSecret() -> String {
         switch self {
         case .GitHub: return BuildasaurxcodeprojKeys().gitHubAPIClientSecret()
-        case .BitBucket: return BuildasaurxcodeprojKeys().bitBucketAPIClientSecret()
         case .EnterpriseGitHub: assert(false)
+        case .BitBucket: return BuildasaurxcodeprojKeys().bitBucketAPIClientSecret()
         }
     }
 }

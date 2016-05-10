@@ -178,7 +178,7 @@ class ProjectViewController: ConfigEditViewController {
             self.useTokenButton.hidden = alreadyHasAuth
             self.loginButton.hidden = alreadyHasAuth
             self.logoutButton.hidden = !alreadyHasAuth
-            showTokenField = userWantsToken && (auth?.type == .PersonalToken || auth == nil)
+            showTokenField = userWantsTokenAuth && (auth?.type == .PersonalToken || auth == nil)
         case .EnterpriseGitHub:
             if !alreadyHasAuth {
                 self.tokenTextField.stringValue = ""
