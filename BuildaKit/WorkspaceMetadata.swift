@@ -78,11 +78,14 @@ extension WorkspaceMetadata {
             gitService = .GitHub
         } else if url.resourceSpecifier.containsString(GitService.BitBucket.hostname()) {
             gitService = .BitBucket
-        } else if url.resourceSpecifier.containsString(GitService.EnterpriseGitHub.hostname()) {
-            var urlPieces = urlString.split(":")
-            gitService = .EnterpriseGitHub(host: urlPieces[0])
         } else {
-            Log.error("This git service is not yet supported.")
+            var urlPieces = projectURLString.split(":")
+            let maybeGitService : GitService? = GitService.createEnterpriseService(urlPieces[0])
+            if maybeGitService != nil {
+                gitService = maybeGitService
+            } else {
+                Log.error("This git service is not yet supported.")
+            }
         }
 
         switch url.scheme {
