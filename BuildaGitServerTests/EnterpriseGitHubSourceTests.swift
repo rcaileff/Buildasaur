@@ -14,11 +14,13 @@ import BuildaUtils
 class EnterpriseGitHubSourceTests: XCTestCase {
 
     var github: GitHubServer!
+    var repo: String!
 
     override func setUp() {
         super.setUp()
 
         self.github = GitServerFactory.server(.EnterpriseGitHub(host: "git.mycompany.com"), auth: nil) as! GitHubServer  // TODO: fill in accessible enterprise github host
+        self.repo = "my/repo"  // TODO: fill in accessible enterprise github repo
     }
 
     override func tearDown() {
@@ -46,7 +48,7 @@ class EnterpriseGitHubSourceTests: XCTestCase {
     func testGetPullRequests() {
 
         let params = [
-            "repo": "my/repo"  // TODO: fill in accessible enterprise github repo
+            "repo": self.repo
         ]
 
         self.tryEndpoint(.GET, endpoint: .PullRequests, params: params) { (body, error) -> () in
@@ -66,7 +68,7 @@ class EnterpriseGitHubSourceTests: XCTestCase {
     func testGetBranches() {
 
         let params = [
-            "repo": "my/repo"  // TODO: fill in accessible enterprise github repo
+            "repo": self.repo
         ]
 
         self.tryEndpoint(.GET, endpoint: .Branches, params: params) { (body, error) -> () in
