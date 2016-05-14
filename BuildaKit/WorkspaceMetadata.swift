@@ -80,10 +80,8 @@ extension WorkspaceMetadata {
             gitService = .BitBucket
         } else {
             var urlPieces = projectURLString.split(":")
-            let maybeGitService : GitService? = GitService.createEnterpriseService(urlPieces[0])
-            if maybeGitService != nil {
-                gitService = maybeGitService
-            } else {
+            gitService = GitService.createEnterpriseService(urlPieces[0])
+            if gitService == nil {
                 Log.error("This git service is not yet supported.")
             }
         }
