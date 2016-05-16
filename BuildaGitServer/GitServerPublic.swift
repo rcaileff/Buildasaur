@@ -90,6 +90,7 @@ public enum GitService {
                 return GitService.EnterpriseGitHub(host: host)
             }
         } catch {
+            Log.error("\(error)")
         }
         return nil
     }
