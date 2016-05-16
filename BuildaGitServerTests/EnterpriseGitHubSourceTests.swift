@@ -14,13 +14,12 @@ import BuildaUtils
 class EnterpriseGitHubSourceTests: XCTestCase {
 
     var github: GitHubServer!
-    var repo: String!
+    var repo: String = "my/repo"  // TODO: fill in accessible enterprise github repo
 
     override func setUp() {
         super.setUp()
 
         self.github = GitServerFactory.server(.EnterpriseGitHub(host: "git.mycompany.com"), auth: nil) as! GitHubServer  // TODO: fill in accessible enterprise github host
-        self.repo = "my/repo"  // TODO: fill in accessible enterprise github repo
     }
 
     override func tearDown() {
