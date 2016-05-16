@@ -33,15 +33,29 @@ class EnterpriseGitHubSourceTests: XCTestCase {
 
         let expect = expectationWithDescription("Waiting for url request")
 
-        let request = try! self.github.endpoints.createRequest(method, endpoint: endpoint, params: params)
+        do {
+            let request = try self.github.endpoints.createRequest(method, endpoint: endpoint, params: params)
 
-        self.github.http.sendRequest(request, completion: { (response, body, error) -> () in
+            self.github.http.sendRequest(request, completion: { (response, body, error) -> () in
 
-            completion(body: body, error: error)
-            expect.fulfill()
-        })
+                completion(body: body, error: error)
+                expect.fulfill()
+            })
 
-        waitForExpectationsWithTimeout(10, handler: nil)
+            waitForExpectationsWithTimeout(10, handler: nil)
+        } catch {
+            XCTFail()
+        }
+    }
+
+    func testCreateEnterpriseServiceShouldReturnNilWhenPassedAnInvalidHostname() {
+        let gitService = GitService.createEnterpriseService("some.fakehostname.com")
+        XCTAssertNil(gitService)
+    }
+
+    func testCreateEnterpriseServiceShouldReturnAGitServiceWhenPassedAValidHostname() {
+        let gitService = GitService.createEnterpriseService("git.enova.com")
+        XCTAssertNotNil(gitService)
     }
 
     func testGetPullRequests() {
