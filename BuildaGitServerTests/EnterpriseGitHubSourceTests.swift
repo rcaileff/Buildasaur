@@ -54,7 +54,7 @@ class EnterpriseGitHubSourceTests: XCTestCase {
     }
 
     func testCreateEnterpriseServiceShouldReturnAGitServiceWhenPassedAValidHostname() {
-        let gitService = GitService.createEnterpriseService("git.enova.com")
+        let gitService = GitService.createEnterpriseService("github.com")
         XCTAssertNotNil(gitService)
     }
 
