@@ -62,7 +62,7 @@ public class UIUtils {
         
         let alert = NSAlert()
         
-        alert.alertStyle = style ?? .InformationalAlertStyle
+        alert.alertStyle = style ?? .Informational
         alert.messageText = text
         
         return alert

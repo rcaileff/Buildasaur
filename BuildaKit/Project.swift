@@ -23,7 +23,7 @@ public class Project {
         return self.config.value
     }
     
-    public var urlString: String { return self.url.absoluteString }
+    public var urlString: String { return self.url.absoluteString! }
     public var privateSSHKey: String? { return self.getContentsOfKeyAtPath(self._config.privateSSHKeyPath) }
     public var publicSSHKey: String? { return self.getContentsOfKeyAtPath(self._config.publicSSHKeyPath) }
     
@@ -83,7 +83,7 @@ public class Project {
         let service = meta.service
         
         let originalStringUrl = projectUrl.absoluteString
-        let stringUrl = originalStringUrl.lowercaseString
+        let stringUrl = originalStringUrl!.lowercaseString
         
         /*
         both https and ssh repos on github have a form of:
@@ -99,7 +99,7 @@ public class Project {
                 let start = githubRange.endIndex.advancedBy(1)
                 let end = dotGitRange.startIndex
             
-                let repoName = originalStringUrl[start ..< end]
+                let repoName = originalStringUrl![start ..< end]
                 return repoName
         }
         return nil

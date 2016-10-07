@@ -95,8 +95,8 @@ class DashboardViewController: PresentableViewController {
     func configTableView() {
         
         let tableView = self.syncersTableView
-        tableView.setDataSource(self)
-        tableView.setDelegate(self)
+        tableView.dataSource = self
+        tableView.delegate = self
         tableView.columnAutoresizingStyle = .UniformColumnAutoresizingStyle
     }
     

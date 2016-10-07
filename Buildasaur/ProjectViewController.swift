@@ -128,7 +128,7 @@ class ProjectViewController: ConfigEditViewController {
         
         //fill data in
         self.projectNameLabel.rac_stringValue <~ meta.map { $0.projectName }
-        self.projectURLLabel.rac_stringValue <~ meta.map { $0.projectURL.absoluteString }
+        self.projectURLLabel.rac_stringValue <~ meta.map { $0.projectURL.absoluteString! }
         self.projectPathLabel.rac_stringValue <~ meta.map { $0.projectPath }
         
         //invalidate availability on change of any input

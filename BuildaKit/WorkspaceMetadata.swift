@@ -74,9 +74,9 @@ extension WorkspaceMetadata {
         var checkoutType: CheckoutType?
         var gitService: GitService?
 
-        if url.resourceSpecifier.containsString(GitService.GitHub.hostname()) {
+        if url.resourceSpecifier!.containsString(GitService.GitHub.hostname()) {
             gitService = .GitHub
-        } else if url.resourceSpecifier.containsString(GitService.BitBucket.hostname()) {
+        } else if url.resourceSpecifier!.containsString(GitService.BitBucket.hostname()) {
             gitService = .BitBucket
         } else {
             var urlPieces = projectURLString.split(":")
@@ -86,17 +86,19 @@ extension WorkspaceMetadata {
             }
         }
 
-        switch url.scheme {
+        let scheme = url.scheme == nil ? "" : url.scheme!
+        switch scheme {
         case "":
             // No scheme, likely to be SSH so let's check for the telltale 'git@' in the resource specifier.
-            if url.resourceSpecifier.containsString("git@") {
+            if url.resourceSpecifier!.containsString("git@") {
                 checkoutType = .SSH
             }
         case "ssh":
             checkoutType = .SSH
-
+        case "git.enova.com": // DISGUSTING HACK! - RDC 9/23/16
+            checkoutType = .SSH
         default:
-            Log.error("The \(url.scheme) scheme is not yet supported.")
+            Log.error("The \(scheme) scheme is not yet supported.")
         }
 
         if let checkoutType = checkoutType, gitService = gitService {

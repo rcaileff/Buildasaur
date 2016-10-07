@@ -23,7 +23,7 @@ public class Logging {
         loggers.append(consoleLogger)
         
         if alsoIntoFile {
-            let fileLogger = FileLogger(fileURL: path)
+            let fileLogger = FileLogger(fileURL: path!)
             fileLogger.fileSizeCap = 1024 * 1024 * 10 // 10MB
             loggers.append(fileLogger)
         }

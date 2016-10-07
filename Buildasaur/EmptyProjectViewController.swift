@@ -142,7 +142,7 @@ class EmptyProjectViewController: EditableViewController {
                 //local source is malformed, something terrible must have happened, inform the user this can't be used (log should tell why exactly)
                 let buttons = ["See workaround", "OK"]
 
-                UIUtils.showAlertWithButtons("Couldn't add Xcode project at path \(url.absoluteString), error: \((error as NSError).localizedDescription).", buttons: buttons, style: NSAlertStyle.CriticalAlertStyle, completion: { (tappedButton) -> () in
+                UIUtils.showAlertWithButtons("Couldn't add Xcode project at path \(url.absoluteString), error: \((error as NSError).localizedDescription).", buttons: buttons, style: NSAlertStyle.Critical, completion: { (tappedButton) -> () in
                     
                     if tappedButton == "See workaround" {
                         openLink("https://github.com/czechboy0/Buildasaur/issues/165#issuecomment-148220340")

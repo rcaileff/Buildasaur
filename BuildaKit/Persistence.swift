@@ -34,7 +34,7 @@ public class PersistenceFactory {
         let buildaRoot = applicationSupport
             .URLByAppendingPathComponent(folderName, isDirectory: true)
         
-        let persistence = Persistence(readingFolder: buildaRoot, writingFolder: buildaRoot, fileManager: fileManager)
+        let persistence = Persistence(readingFolder: buildaRoot!, writingFolder: buildaRoot!, fileManager: fileManager)
         return persistence
     }
 }
@@ -106,7 +106,7 @@ public class Persistence {
             let name = itemFileName(item: item)
             let url = folderUrl.URLByAppendingPathComponent("\(name).json")
             do {
-                try self.saveJSONToUrl(json, url: url)
+                try self.saveJSONToUrl(json, url: url!)
             } catch {
                 assert(false, "Failed to save a \(folderName), \(error)")
             }
@@ -215,9 +215,9 @@ public class Persistence {
         let root = self.folderForIntention(intention)
         let url = root.URLByAppendingPathComponent(name, isDirectory: isDirectory)
         if isDirectory && intention == .Writing {
-            self.createFolderIfNotExists(url)
+            self.createFolderIfNotExists(url!)
         }
-        return url
+        return url!
     }
     
     public func copyFileToWriteLocation(name: String, isDirectory: Bool) {
@@ -235,7 +235,7 @@ public class Persistence {
             .fileURLWithName(folder, intention: .Writing, isDirectory: true)
             .URLByAppendingPathComponent(fileName, isDirectory: false)
         
-        _ = try? self.fileManager.copyItemAtURL(url, toURL: writeUrl)
+        _ = try? self.fileManager.copyItemAtURL(url, toURL: writeUrl!)
     }
     
     public func createFolderIfNotExists(url: NSURL) {

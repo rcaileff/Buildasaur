@@ -13,14 +13,14 @@ import XcodeServerSDK
 
 public class NetworkUtils {
     
-    public typealias VerificationCompletion = (success: Bool, error: ErrorType?) -> ()
+    public typealias VerificationCompletion = (Bool, ErrorType?) -> ()
     
     public class func checkAvailabilityOfServiceWithProject(project: Project, completion: VerificationCompletion) {
         
         self.checkService(project, completion: { success, error in
             
             if !success {
-                completion(success: false, error: error)
+                completion(false, error)
                 return
             }
             
@@ -35,7 +35,7 @@ public class NetworkUtils {
                 }
                 
                 //now complete
-                completion(success: success, error: error)
+                completion(success, error)
             })
         })
     }
@@ -48,7 +48,7 @@ public class NetworkUtils {
         
         //check if we can get the repo and verify permissions
         guard let repoName = project.serviceRepoName() else {
-            completion(success: false, error: Error.withInfo("Invalid repo name"))
+            completion(false, Error.withInfo("Invalid repo name"))
             return
         }
         
@@ -56,7 +56,7 @@ public class NetworkUtils {
         server.getRepo(repoName, completion: { (repo, error) -> () in
             
             if error != nil {
-                completion(success: false, error: error)
+                completion(false, error)
                 return
             }
             
@@ -68,20 +68,20 @@ public class NetworkUtils {
                 
                 //look at the permissions in the PR metadata
                 if !readPermission {
-                    completion(success: false, error: Error.withInfo("Missing read permission for repo"))
+                    completion(false, Error.withInfo("Missing read permission for repo"))
                 } else if !writePermission {
-                    completion(success: false, error: Error.withInfo("Missing write permission for repo"))
+                    completion(false, Error.withInfo("Missing write permission for repo"))
                 } else {
                     //now complete
-                    completion(success: true, error: nil)
+                    completion(true, nil)
                 }
             } else {
-                completion(success: false, error: Error.withInfo("Couldn't find repo permissions in \(service.prettyName()) response"))
+                completion(false, Error.withInfo("Couldn't find repo permissions in \(service.prettyName()) response"))
             }
         })
     }
     
-    public class func checkAvailabilityOfXcodeServerWithCurrentSettings(config: XcodeServerConfig, completion: (success: Bool, error: NSError?) -> ()) {
+    public class func checkAvailabilityOfXcodeServerWithCurrentSettings(config: XcodeServerConfig, completion: (Bool, NSError?) -> ()) {
         
         let xcodeServer = XcodeServerFactory.server(config)
         
@@ -90,32 +90,32 @@ public class NetworkUtils {
         xcodeServer.logout { (success, error) -> () in
             
             if let error = error {
-                completion(success: false, error: error)
+                completion(false, error)
                 return
             }
             
             xcodeServer.getUserCanCreateBots({ (canCreateBots, error) -> () in
                 
                 if let error = error {
-                    completion(success: false, error: error)
+                    completion(false, error)
                     return
                 }
                 
-                completion(success: canCreateBots, error: nil)
+                completion(canCreateBots, nil)
             })
         }
     }
     
-    class func checkValidityOfSSHKeys(blueprint: SourceControlBlueprint, completion: (success: Bool, error: NSError?) -> ()) {
+    class func checkValidityOfSSHKeys(blueprint: SourceControlBlueprint, completion: (Bool, NSError?) -> ()) {
         
         let blueprintDict = blueprint.dictionarify()
         let r = SSHKeyVerification.verifyBlueprint(blueprintDict)
         
         //based on the return value, either succeed or fail
         if r.terminationStatus == 0 {
-            completion(success: true, error: nil)
+            completion(true, nil)
         } else {
-            completion(success: false, error: Error.withInfo(r.standardError))
+            completion(false, Error.withInfo(r.standardError))
         }
     }
 }

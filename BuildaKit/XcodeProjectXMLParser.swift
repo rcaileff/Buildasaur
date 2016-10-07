@@ -22,7 +22,7 @@ class XcodeProjectXMLParser {
         
         let contentsUrl = url.URLByAppendingPathComponent("contents.xcworkspacedata")
         
-        guard let jiDoc = Ji(contentsOfURL: contentsUrl, isXML: true) else { throw WorkspaceParsingError.ParsingFailed }
+        guard let jiDoc = Ji(contentsOfURL: contentsUrl!, isXML: true) else { throw WorkspaceParsingError.ParsingFailed }
         guard
             let workspaceNode = jiDoc.rootNode,
             let workspaceTag = workspaceNode.tag where workspaceTag == "Workspace" else { throw WorkspaceParsingError.FailedToFindWorkspaceNode }
@@ -36,7 +36,7 @@ class XcodeProjectXMLParser {
         }
         
         let parsedRelativePaths = locations.map { $0.componentsSeparatedByString(":").last! }
-        let absolutePaths = parsedRelativePaths.map { return url.URLByAppendingPathComponent("..").URLByAppendingPathComponent($0) }
+        let absolutePaths = parsedRelativePaths.map { return url.URLByAppendingPathComponent("..")!.URLByAppendingPathComponent($0)! }
         return absolutePaths
     }
 }
