@@ -29,9 +29,9 @@ class EnterpriseGitHubSourceTests: XCTestCase {
         super.tearDown()
     }
 
-    func tryEndpoint(method: HTTP.Method, endpoint: GitHubEndpoints.Endpoint, params: [String: String]?, completion: (body: AnyObject!, error: NSError!) -> ()) {
+    func tryEndpoint(_ method: HTTP.Method, endpoint: GitHubEndpoints.Endpoint, params: [String: String]?, completion: @escaping (_ body: AnyObject?, _ error: NSError?) -> ()) {
 
-        let expect = expectationWithDescription("Waiting for url request")
+        let expect = expectation(description: "Waiting for url request")
 
         let request = try! self.github.endpoints.createRequest(method, endpoint: endpoint, params: params)
 
@@ -41,7 +41,7 @@ class EnterpriseGitHubSourceTests: XCTestCase {
             expect.fulfill()
         })
 
-        waitForExpectationsWithTimeout(10, handler: nil)
+        waitForExpectations(timeout: 10, handler: nil)
     }
 
     func testGetPullRequests() {

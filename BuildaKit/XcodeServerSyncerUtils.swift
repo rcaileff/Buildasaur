@@ -11,9 +11,9 @@ import XcodeServerSDK
 import BuildaGitServer
 import BuildaUtils
 
-public class XcodeServerSyncerUtils {
+open class XcodeServerSyncerUtils {
     
-    public class func createBotFromBuildTemplate(botName: String, syncer: StandardSyncer, template: BuildTemplate, project: Project, branch: String, scheduleOverride: BotSchedule?, xcodeServer: XcodeServer, completion: (bot: Bot?, error: NSError?) -> ()) {
+    open class func createBotFromBuildTemplate(_ botName: String, syncer: StandardSyncer, template: BuildTemplate, project: Project, branch: String, scheduleOverride: BotSchedule?, xcodeServer: XcodeServer, completion: (_ bot: Bot?, _ error: NSError?) -> ()) {
         
         //pull info from template
         let schemeName = template.scheme

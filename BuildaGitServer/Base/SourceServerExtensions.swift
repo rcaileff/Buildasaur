@@ -15,7 +15,7 @@ extension SourceServerType {
     /**
     *   Get the latest status of a pull request.
     */
-    func getStatusOfPullRequest(pullRequestNumber: Int, repo: String, completion: (status: StatusType?, error: ErrorType?) -> ()) {
+    func getStatusOfPullRequest(_ pullRequestNumber: Int, repo: String, completion: @escaping (_ status: StatusType?, _ error: Error?) -> ()) {
         
         self.getPullRequest(pullRequestNumber, repo: repo) { (pr, error) -> () in
             
@@ -35,7 +35,7 @@ extension SourceServerType {
     }
 
     //TODO: support paging through all the comments. currently we only fetch the last ~30 comments.
-    public func findMatchingCommentInIssue(commentsToMatch: [String], issue: Int, repo: String, completion: (foundComments: [CommentType]?, error: ErrorType?) -> ()) {
+    public func findMatchingCommentInIssue(_ commentsToMatch: [String], issue: Int, repo: String, completion: @escaping (_ foundComments: [CommentType]?, _ error: Error?) -> ()) {
         
         self.getCommentsOfIssue(issue, repo: repo) { (comments, error) -> () in
             

@@ -11,14 +11,14 @@ import XcodeServerSDK
 import BuildaGitServer
 import BuildaUtils
 
-public class SyncPairResolver {
+open class SyncPairResolver {
     
     public init() {
         //
     }
     
-    public func resolveActionsForCommitAndIssueWithBotIntegrations(
-        commit: String,
+    open func resolveActionsForCommitAndIssueWithBotIntegrations(
+        _ commit: String,
         issue: IssueType?,
         bot: Bot,
         hostname: String,
@@ -138,7 +138,7 @@ public class SyncPairResolver {
             )
     }
     
-    func headCommitIntegrationsFromAllIntegrations(headCommit: String, allIntegrations: [Integration]) -> [Integration] {
+    func headCommitIntegrationsFromAllIntegrations(_ headCommit: String, allIntegrations: [Integration]) -> [Integration] {
         
         let uniqueIntegrations = Set(allIntegrations)
         
@@ -194,7 +194,7 @@ public class SyncPairResolver {
         return sortedHeadCommitIntegrations
     }
     
-    class func linkToServer(hostname: String, bot: Bot, integration: Integration) -> String {
+    class func linkToServer(_ hostname: String, bot: Bot, integration: Integration) -> String {
         
         //unfortunately, since github doesn't allow non-https links anywhere, we
         //must proxy through Satellite (https://github.com/czechboy0/satellite)
@@ -207,7 +207,7 @@ public class SyncPairResolver {
     }
     
     func resolveCommitStatusFromLatestIntegrations(
-        commit: String,
+        _ commit: String,
         issue: IssueType?,
         pending: Integration?,
         running: Integration?,
@@ -266,7 +266,7 @@ public class SyncPairResolver {
     }
     
     func resolveStatusFromCompletedIntegrations(
-        integrations: Set<Integration>,
+        _ integrations: Set<Integration>,
         statusCreator: BuildStatusCreator,
         link: (Integration) -> String?
         ) -> StatusAndComment {

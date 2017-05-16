@@ -18,17 +18,17 @@ class GitHubStatus : GitHubEntity {
         case Error = "error"
         case Failure = "failure"
         
-        static func fromBuildState(buildState: BuildState) -> GitHubState {
+        static func fromBuildState(_ buildState: BuildState) -> GitHubState {
             switch buildState {
-            case .NoState:
+            case .noState:
                 return .NoState
-            case .Pending:
+            case .pending:
                 return .Pending
-            case .Success:
+            case .success:
                 return .Success
-            case .Error:
+            case .error:
                 return .Error
-            case .Failure:
+            case .failure:
                 return .Failure
             }
         }
@@ -36,15 +36,15 @@ class GitHubStatus : GitHubEntity {
         func toBuildState() -> BuildState {
             switch self {
             case .NoState:
-                return .NoState
+                return .noState
             case .Pending:
-                return .Pending
+                return .pending
             case .Success:
-                return .Success
+                return .success
             case .Error:
-                return .Error
+                return .error
             case .Failure:
-                return .Failure
+                return .failure
             }
         }
     }

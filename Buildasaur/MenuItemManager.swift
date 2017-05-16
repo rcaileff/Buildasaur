@@ -13,21 +13,21 @@ class MenuItemManager : NSObject, NSMenuDelegate {
     
     var syncerManager: SyncerManager!
     
-    private var statusItem: NSStatusItem?
-    private var firstIndexLastSyncedMenuItem: Int!
+    fileprivate var statusItem: NSStatusItem?
+    fileprivate var firstIndexLastSyncedMenuItem: Int!
     
     func setupMenuBarItem() {
         
-        let statusBar = NSStatusBar.systemStatusBar()
+        let statusBar = NSStatusBar.system()
         
-        let statusItem = statusBar.statusItemWithLength(32)
+        let statusItem = statusBar.statusItem(withLength: 32)
         statusItem.title = ""
         statusItem.image = NSImage(named: "icon")
         statusItem.highlightMode = true
         
         let menu = NSMenu()
-        menu.addItemWithTitle("Open Buildasaur", action: #selector(AppDelegate.showMainWindow), keyEquivalent: "")
-        menu.addItem(NSMenuItem.separatorItem())
+        menu.addItem(withTitle: "Open Buildasaur", action: #selector(AppDelegate.showMainWindow), keyEquivalent: "")
+        menu.addItem(NSMenuItem.separator())
         self.firstIndexLastSyncedMenuItem = menu.numberOfItems
         
         statusItem.menu = menu
@@ -35,7 +35,7 @@ class MenuItemManager : NSObject, NSMenuDelegate {
         self.statusItem = statusItem
     }
     
-    func menuWillOpen(menu: NSMenu) {
+    func menuWillOpen(_ menu: NSMenu) {
         
         //update with last sync/statuses
         let syncers = self.syncerManager.syncers
@@ -70,7 +70,7 @@ class MenuItemManager : NSObject, NSMenuDelegate {
             }
             
             let time: String
-            if let lastSuccess = syncer.lastSuccessfulSyncFinishedDate where syncer.active {
+            if let lastSuccess = syncer.lastSuccessfulSyncFinishedDate, syncer.active {
                 time = "last synced \(lastSuccess.nicelyFormattedRelativeTimeToNow())"
             } else {
                 time = ""

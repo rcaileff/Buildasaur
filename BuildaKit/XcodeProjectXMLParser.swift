@@ -11,24 +11,24 @@ import Ji
 
 class XcodeProjectXMLParser {
     
-    enum WorkspaceParsingError: ErrorType {
-        case ParsingFailed
-        case FailedToFindWorkspaceNode
-        case NoProjectsFound
-        case NoLocationInProjectFound
+    enum WorkspaceParsingError: Error {
+        case parsingFailed
+        case failedToFindWorkspaceNode
+        case noProjectsFound
+        case noLocationInProjectFound
     }
     
-    static func parseProjectsInsideOfWorkspace(url: NSURL) throws -> [NSURL] {
+    static func parseProjectsInsideOfWorkspace(_ url: URL) throws -> [URL] {
         
-        let contentsUrl = url.URLByAppendingPathComponent("contents.xcworkspacedata")
+        let contentsUrl = url.appendingPathComponent("contents.xcworkspacedata")
         
-        guard let jiDoc = Ji(contentsOfURL: contentsUrl!, isXML: true) else { throw WorkspaceParsingError.ParsingFailed }
+        guard let jiDoc = Ji(contentsOfURL: contentsUrl!, isXML: true) else { throw WorkspaceParsingError.parsingFailed }
         guard
             let workspaceNode = jiDoc.rootNode,
-            let workspaceTag = workspaceNode.tag where workspaceTag == "Workspace" else { throw WorkspaceParsingError.FailedToFindWorkspaceNode }
+            let workspaceTag = workspaceNode.tag, workspaceTag == "Workspace" else { throw WorkspaceParsingError.failedToFindWorkspaceNode }
         
         let projects = workspaceNode.childrenWithName("FileRef")
-        guard projects.count > 0 else { throw WorkspaceParsingError.NoProjectsFound }
+        guard projects.count > 0 else { throw WorkspaceParsingError.noProjectsFound }
         
         let locations = try projects.map { projectNode throws -> String in
             guard let location = projectNode["location"] else { throw WorkspaceParsingError.NoLocationInProjectFound }

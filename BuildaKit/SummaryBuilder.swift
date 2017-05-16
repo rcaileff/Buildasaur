@@ -24,7 +24,7 @@ class SummaryBuilder {
     
     //MARK: high level
     
-    func buildPassing(integration: Integration) -> StatusAndComment {
+    func buildPassing(_ integration: Integration) -> StatusAndComment {
         
         let linkToIntegration = self.linkBuilder(integration)
         self.addBaseCommentFromIntegration(integration)
@@ -55,7 +55,7 @@ class SummaryBuilder {
         return self.buildWithStatus(status)
     }
     
-    func buildFailingTests(integration: Integration) -> StatusAndComment {
+    func buildFailingTests(_ integration: Integration) -> StatusAndComment {
         
         let linkToIntegration = self.linkBuilder(integration)
         
@@ -67,7 +67,7 @@ class SummaryBuilder {
         return self.buildWithStatus(status)
     }
     
-    func buildErrorredIntegration(integration: Integration) -> StatusAndComment {
+    func buildErrorredIntegration(_ integration: Integration) -> StatusAndComment {
         
         let linkToIntegration = self.linkBuilder(integration)
         self.addBaseCommentFromIntegration(integration)
@@ -78,7 +78,7 @@ class SummaryBuilder {
         return self.buildWithStatus(status)
     }
     
-    func buildCanceledIntegration(integration: Integration) -> StatusAndComment {
+    func buildCanceledIntegration(_ integration: Integration) -> StatusAndComment {
         
         let linkToIntegration = self.linkBuilder(integration)
         
@@ -98,13 +98,13 @@ class SummaryBuilder {
     
     //MARK: utils
     
-    private func createStatus(state: BuildState, description: String?, targetUrl: String?) -> StatusType {
+    fileprivate func createStatus(_ state: BuildState, description: String?, targetUrl: String?) -> StatusType {
         
         let status = self.statusCreator.createStatusFromState(state, description: description, targetUrl: targetUrl)
         return status
     }
     
-    func addBaseCommentFromIntegration(integration: Integration) {
+    func addBaseCommentFromIntegration(_ integration: Integration) {
         
         var integrationText = "Integration \(integration.number)"
         if let link = self.linkBuilder(integration) {
@@ -120,28 +120,28 @@ class SummaryBuilder {
         }
     }
     
-    func appendTestsPassed(buildResultSummary: BuildResultSummary) {
+    func appendTestsPassed(_ buildResultSummary: BuildResultSummary) {
         
         let testsCount = buildResultSummary.testsCount
         let testSection = testsCount > 0 ? "All \(testsCount) " + "test".pluralizeStringIfNecessary(testsCount) + " passed. " : ""
         self.lines.append(self.resultString + "**Perfect build!** \(testSection):+1:")
     }
     
-    func appendWarnings(buildResultSummary: BuildResultSummary) {
+    func appendWarnings(_ buildResultSummary: BuildResultSummary) {
         
         let warningCount = buildResultSummary.warningCount
         let testsCount = buildResultSummary.testsCount
         self.lines.append(self.resultString + "All \(testsCount) tests passed, but please **fix \(warningCount) " + "warning".pluralizeStringIfNecessary(warningCount) + "**.")
     }
     
-    func appendAnalyzerWarnings(buildResultSummary: BuildResultSummary) {
+    func appendAnalyzerWarnings(_ buildResultSummary: BuildResultSummary) {
         
         let analyzerWarningCount = buildResultSummary.analyzerWarningCount
         let testsCount = buildResultSummary.testsCount
         self.lines.append(self.resultString + "All \(testsCount) tests passed, but please **fix \(analyzerWarningCount) " + "analyzer warning".pluralizeStringIfNecessary(analyzerWarningCount) + "**.")
     }
     
-    func appendWarningsAndAnalyzerWarnings(buildResultSummary: BuildResultSummary) {
+    func appendWarningsAndAnalyzerWarnings(_ buildResultSummary: BuildResultSummary) {
         
         let warningCount = buildResultSummary.warningCount
         let analyzerWarningCount = buildResultSummary.analyzerWarningCount
@@ -149,7 +149,7 @@ class SummaryBuilder {
         self.lines.append(self.resultString + "All \(testsCount) tests passed, but please **fix \(warningCount) " + "warning".pluralizeStringIfNecessary(warningCount) + "** and **\(analyzerWarningCount) " + "analyzer warning".pluralizeStringIfNecessary(analyzerWarningCount) + "**.")
     }
     
-    func appendCodeCoverage(buildResultSummary: BuildResultSummary) {
+    func appendCodeCoverage(_ buildResultSummary: BuildResultSummary) {
         
         let codeCoveragePercentage = buildResultSummary.codeCoveragePercentage
         if codeCoveragePercentage > 0 {
@@ -157,14 +157,14 @@ class SummaryBuilder {
         }
     }
     
-    func appendTestFailure(buildResultSummary: BuildResultSummary) {
+    func appendTestFailure(_ buildResultSummary: BuildResultSummary) {
         
         let testFailureCount = buildResultSummary.testFailureCount
         let testsCount = buildResultSummary.testsCount
         self.lines.append(self.resultString + "**Build failed \(testFailureCount) " + "test".pluralizeStringIfNecessary(testFailureCount) + "** out of \(testsCount)")
     }
     
-    func appendErrors(integration: Integration) {
+    func appendErrors(_ integration: Integration) {
         
         let errorCount: Int = integration.buildResultSummary?.errorCount ?? -1
         self.lines.append(self.resultString + "**\(errorCount) " + "error".pluralizeStringIfNecessary(errorCount) + ", failing state: \(integration.result!.rawValue)**")
@@ -176,13 +176,13 @@ class SummaryBuilder {
         self.lines.append("Build was **manually canceled**.")
     }
     
-    func buildWithStatus(status: StatusType) -> StatusAndComment {
+    func buildWithStatus(_ status: StatusType) -> StatusAndComment {
         
         let comment: String?
         if lines.count == 0 {
             comment = nil
         } else {
-            comment = lines.joinWithSeparator("\n")
+            comment = lines.joined(separator: "\n")
         }
         return StatusAndComment(status: status, comment: comment)
     }
@@ -190,7 +190,7 @@ class SummaryBuilder {
 
 extension SummaryBuilder {
     
-    func formattedDurationOfIntegration(integration: Integration) -> String? {
+    func formattedDurationOfIntegration(_ integration: Integration) -> String? {
         
         if let seconds = integration.duration {
             

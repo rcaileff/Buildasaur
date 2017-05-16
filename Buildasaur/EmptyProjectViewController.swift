@@ -13,7 +13,7 @@ import Result
 import BuildaUtils
 
 protocol EmptyProjectViewControllerDelegate: class {
-    func didSelectProjectConfig(config: ProjectConfig)
+    func didSelectProjectConfig(_ config: ProjectConfig)
 }
 
 extension ProjectConfig {
@@ -35,8 +35,8 @@ class EmptyProjectViewController: EditableViewController {
     
     @IBOutlet weak var existingProjectsPopup: NSPopUpButton!
     
-    private var projectConfigs: [ProjectConfig] = []
-    private var selectedConfig = MutableProperty<ProjectConfig?>(nil)
+    fileprivate var projectConfigs: [ProjectConfig] = []
+    fileprivate var selectedConfig = MutableProperty<ProjectConfig?>(nil)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -54,7 +54,7 @@ class EmptyProjectViewController: EditableViewController {
             index = 0
         }
         self.selectItemAtIndex(index)
-        self.existingProjectsPopup.selectItemAtIndex(index)
+        self.existingProjectsPopup.selectItem(at: index)
     }
     
     func addNewString() -> String {
@@ -78,12 +78,12 @@ class EmptyProjectViewController: EditableViewController {
         return super.shouldGoNext()
     }
     
-    private func setupEditableStates() {
+    fileprivate func setupEditableStates() {
         
         self.nextAllowed <~ self.selectedConfig.producer.map { $0 != nil }
     }
     
-    private func selectItemAtIndex(index: Int) {
+    fileprivate func selectItemAtIndex(_ index: Int) {
         
         let configs = self.projectConfigs
         
@@ -92,7 +92,7 @@ class EmptyProjectViewController: EditableViewController {
         self.selectedConfig.value = config
     }
     
-    private func setupPopupAction() {
+    fileprivate func setupPopupAction() {
         
         let handler = SignalProducer<AnyObject, NoError> { [weak self] sink, _ in
             if let sself = self {
@@ -105,7 +105,7 @@ class EmptyProjectViewController: EditableViewController {
         self.existingProjectsPopup.rac_command = toRACCommand(action)
     }
     
-    private func setupDataSource() {
+    fileprivate func setupDataSource() {
         
         let configsProducer = self.storageManager.projectConfigs.producer
         let allConfigsProducer = configsProducer
@@ -124,12 +124,12 @@ class EmptyProjectViewController: EditableViewController {
         }
     }
     
-    private func didSelectProjectConfig(config: ProjectConfig) {
+    fileprivate func didSelectProjectConfig(_ config: ProjectConfig) {
         Log.verbose("Selected \(config.url)")
         self.emptyProjectDelegate?.didSelectProjectConfig(config)
     }
     
-    private func pickNewProject() -> ProjectConfig? {
+    fileprivate func pickNewProject() -> ProjectConfig? {
         
         if let url = StorageUtils.openWorkspaceOrProject() {
             

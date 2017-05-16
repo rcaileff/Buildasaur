@@ -18,7 +18,7 @@ class SyncPair_PR_NoBot: SyncPair {
         super.init()
     }
     
-    override func sync(completion: Completion) {
+    override func sync(_ completion: Completion) {
         
         //create a bot for this PR
         let syncer = self.syncer
@@ -33,7 +33,7 @@ class SyncPair_PR_NoBot: SyncPair {
     
     //MARK: Internal
     
-    private class func createBotForPR(syncer syncer: StandardSyncer, pr: PullRequestType, completion: Completion) {
+    fileprivate class func createBotForPR(syncer: StandardSyncer, pr: PullRequestType, completion: @escaping Completion) {
         
         syncer.createBotFromPR(pr, completion: { () -> () in
             completion(error: nil)

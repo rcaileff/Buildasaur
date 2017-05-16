@@ -9,31 +9,31 @@
 import Foundation
 import BuildaUtils
 
-public class XcodeProjectParser {
+open class XcodeProjectParser {
     
-    static private var sourceControlFileParsers: [SourceControlFileParser] = [
+    static fileprivate var sourceControlFileParsers: [SourceControlFileParser] = [
         CheckoutFileParser(),
         BlueprintFileParser(),
     ]
     
-    private class func firstItemMatchingTestRecursive(url: NSURL, test: (itemUrl: NSURL) -> Bool) throws -> NSURL? {
+    fileprivate class func firstItemMatchingTestRecursive(_ url: URL, test: (_ itemUrl: URL) -> Bool) throws -> URL? {
         
-        let fm = NSFileManager.defaultManager()
+        let fm = FileManager.default
         
         if let path = url.path {
             
             var isDir: ObjCBool = false
-            let exists = fm.fileExistsAtPath(path, isDirectory: &isDir)
+            let exists = fm.fileExists(atPath: path, isDirectory: &isDir)
             if !exists {
                 return nil
             }
             
             if !isDir {
                 //not dir, test
-                return test(itemUrl: url) ? url : nil
+                return test(url) ? url : nil
             }
             
-            let contents = try fm.contentsOfDirectoryAtURL(url, includingPropertiesForKeys: nil, options: NSDirectoryEnumerationOptions())
+            let contents = try fm.contentsOfDirectory(at: url, includingPropertiesForKeys: nil, options: FileManager.DirectoryEnumerationOptions())
             for i in contents {
                 if let foundUrl = try self.firstItemMatchingTestRecursive(i, test: test) {
                     return foundUrl
@@ -43,23 +43,23 @@ public class XcodeProjectParser {
         return nil
     }
     
-    private class func firstItemMatchingTest(url: NSURL, test: (itemUrl: NSURL) -> Bool) throws -> NSURL? {
+    fileprivate class func firstItemMatchingTest(_ url: URL, test: (_ itemUrl: URL) -> Bool) throws -> URL? {
         
         return try self.allItemsMatchingTest(url, test: test).first
     }
 
-    private class func allItemsMatchingTest(url: NSURL, test: (itemUrl: NSURL) -> Bool) throws -> [NSURL] {
+    fileprivate class func allItemsMatchingTest(_ url: URL, test: (_ itemUrl: URL) -> Bool) throws -> [URL] {
         
-        let fm = NSFileManager.defaultManager()
-        let contents = try fm.contentsOfDirectoryAtURL(url, includingPropertiesForKeys: nil, options: NSDirectoryEnumerationOptions())
+        let fm = FileManager.default
+        let contents = try fm.contentsOfDirectory(at: url, includingPropertiesForKeys: nil, options: FileManager.DirectoryEnumerationOptions())
         
         let filtered = contents.filter(test)
         return filtered
     }
     
-    private class func findCheckoutOrBlueprintUrl(projectOrWorkspaceUrl: NSURL) throws -> NSURL {
+    fileprivate class func findCheckoutOrBlueprintUrl(_ projectOrWorkspaceUrl: URL) throws -> URL {
         
-        if let found = try self.firstItemMatchingTestRecursive(projectOrWorkspaceUrl, test: { (itemUrl: NSURL) -> Bool in
+        if let found = try self.firstItemMatchingTestRecursive(projectOrWorkspaceUrl, test: { (itemUrl: URL) -> Bool in
             
             let pathExtension = itemUrl.pathExtension
             return pathExtension == "xccheckout" || pathExtension == "xcscmblueprint"
@@ -69,9 +69,9 @@ public class XcodeProjectParser {
         throw Error.withInfo("No xccheckout or xcscmblueprint file found")
     }
     
-    private class func parseCheckoutOrBlueprintFile(url: NSURL) throws -> WorkspaceMetadata {
+    fileprivate class func parseCheckoutOrBlueprintFile(_ url: URL) throws -> WorkspaceMetadata {
         
-        let pathExtension = url.pathExtension!
+        let pathExtension = url.pathExtension
         
         let maybeParser = self.sourceControlFileParsers.filter {
             Set($0.supportedFileExtensions()).contains(pathExtension)
@@ -84,7 +84,7 @@ public class XcodeProjectParser {
         return parsedWorkspace
     }
     
-    public class func parseRepoMetadataFromProjectOrWorkspaceURL(url: NSURL) throws -> WorkspaceMetadata {
+    open class func parseRepoMetadataFromProjectOrWorkspaceURL(_ url: URL) throws -> WorkspaceMetadata {
         
         do {
             let checkoutUrl = try self.findCheckoutOrBlueprintUrl(url)
@@ -104,12 +104,12 @@ public class XcodeProjectParser {
         }
     }
     
-    public class func sharedSchemesFromProjectOrWorkspaceUrl(url: NSURL) -> [XcodeScheme] {
+    open class func sharedSchemesFromProjectOrWorkspaceUrl(_ url: URL) -> [XcodeScheme] {
         
-        var projectUrls: [NSURL]
+        var projectUrls: [URL]
         if self.isWorkspaceUrl(url) {
             //first parse project urls from workspace contents
-            projectUrls = self.projectUrlsFromWorkspace(url) ?? [NSURL]()
+            projectUrls = self.projectUrlsFromWorkspace(url) ?? [URL]()
             
             //also add the workspace's url, it might own some schemes as well
             projectUrls.append(url)
@@ -122,32 +122,32 @@ public class XcodeProjectParser {
         //we have the project urls, now let's parse schemes from each of them
         let schemes = projectUrls.map {
             return self.sharedSchemeUrlsFromProjectUrl($0)
-        }.reduce([XcodeScheme](), combine: { (arr, newSchemes) -> [XcodeScheme] in
+        }.reduce([XcodeScheme](), { (arr, newSchemes) -> [XcodeScheme] in
             return arr + newSchemes
         })
         
         return schemes
     }
     
-    private class func sharedSchemeUrlsFromProjectUrl(url: NSURL) -> [XcodeScheme] {
+    fileprivate class func sharedSchemeUrlsFromProjectUrl(_ url: URL) -> [XcodeScheme] {
         
         //the structure is
         //in a project file, if there are any shared schemes, they will be in
         //xcshareddata/xcschemes/*
         do {
             if let sharedDataFolder = try self.firstItemMatchingTest(url,
-                test: { (itemUrl: NSURL) -> Bool in
+                test: { (itemUrl: URL) -> Bool in
                     
                     return itemUrl.lastPathComponent == "xcshareddata"
             }) {
                 
                 if let schemesFolder = try self.firstItemMatchingTest(sharedDataFolder,
-                    test: { (itemUrl: NSURL) -> Bool in
+                    test: { (itemUrl: URL) -> Bool in
                         
                         return itemUrl.lastPathComponent == "xcschemes"
                 }) {
                     //we have the right folder, yay! just filter all files ending with xcscheme
-                    let schemeUrls = try self.allItemsMatchingTest(schemesFolder, test: { (itemUrl: NSURL) -> Bool in
+                    let schemeUrls = try self.allItemsMatchingTest(schemesFolder, test: { (itemUrl: URL) -> Bool in
                         let ext = itemUrl.pathExtension ?? ""
                         return ext == "xcscheme"
                     })
@@ -161,15 +161,15 @@ public class XcodeProjectParser {
         return []
     }
     
-    private class func isProjectUrl(url: NSURL) -> Bool {
+    fileprivate class func isProjectUrl(_ url: URL) -> Bool {
         return url.pathExtension == "xcodeproj"
     }
 
-    private class func isWorkspaceUrl(url: NSURL) -> Bool {
+    fileprivate class func isWorkspaceUrl(_ url: URL) -> Bool {
         return url.pathExtension == "xcworkspace"
     }
 
-    private class func projectUrlsFromWorkspace(url: NSURL) -> [NSURL]? {
+    fileprivate class func projectUrlsFromWorkspace(_ url: URL) -> [URL]? {
         
         assert(self.isWorkspaceUrl(url), "Url \(url) is not a workspace url")
         
@@ -182,9 +182,9 @@ public class XcodeProjectParser {
         }
     }
     
-    private class func parseSharedSchemesFromProjectURL(url: NSURL) -> (schemeUrls: [NSURL]?, error: NSError?) {
+    fileprivate class func parseSharedSchemesFromProjectURL(_ url: URL) -> (schemeUrls: [URL]?, error: NSError?) {
         
-        return (schemeUrls: [NSURL](), error: nil)
+        return (schemeUrls: [URL](), error: nil)
     }
     
 }

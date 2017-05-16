@@ -13,7 +13,7 @@ extension MainEditorViewController {
     
     //view controller manipulation
 
-    private func rebindContentViewController() {
+    fileprivate func rebindContentViewController() {
         
         let content = self._contentViewController!
         
@@ -25,13 +25,13 @@ extension MainEditorViewController {
         self.nextButton.rac_title <~ content.nextTitle
     }
     
-    private func remove(viewController: NSViewController?) {
+    fileprivate func remove(_ viewController: NSViewController?) {
         guard let vc = viewController else { return }
         vc.view.removeFromSuperview()
         vc.removeFromParentViewController()
     }
     
-    private func add(viewController: EditableViewController) {
+    fileprivate func add(_ viewController: EditableViewController) {
         self.addChildViewController(viewController)
         let view = viewController.view
         self.containerView.addSubview(view)
@@ -45,7 +45,7 @@ extension MainEditorViewController {
         self.rebindContentViewController()
     }
     
-    func setContentViewController(viewController: EditableViewController, animated: Bool) {
+    func setContentViewController(_ viewController: EditableViewController, animated: Bool) {
         
         //1. remove the old view
         self.remove(self._contentViewController)

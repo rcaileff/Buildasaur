@@ -8,10 +8,10 @@
 
 import Foundation
 
-extension NSURL {
+extension URL {
     
     public var fileNameNoExtension: String? {
-        return ((self.lastPathComponent ?? "") as NSString).stringByDeletingPathExtension
+        return ((self.lastPathComponent ?? "") as NSString).deletingPathExtension
     }
 }
 
@@ -21,6 +21,6 @@ public struct XcodeScheme {
         return self.path.fileNameNoExtension!
     }
     
-    public let path: NSURL
-    public let ownerProjectOrWorkspace: NSURL
+    public let path: URL
+    public let ownerProjectOrWorkspace: URL
 }

@@ -12,9 +12,9 @@ import Result
 import BuildaUtils
 import XcodeServerSDK
 
-public class AvailabilityChecker {
+open class AvailabilityChecker {
     
-    public static func xcodeServerAvailability() -> Action<XcodeServerConfig, AvailabilityCheckState, NoError> {
+    open static func xcodeServerAvailability() -> Action<XcodeServerConfig, AvailabilityCheckState, NoError> {
         return Action {
             (input: XcodeServerConfig) -> SignalProducer<AvailabilityCheckState, NoError> in
             
@@ -37,7 +37,7 @@ public class AvailabilityChecker {
         }
     }
     
-    public static func projectAvailability() -> Action<ProjectConfig, AvailabilityCheckState, NoError> {
+    open static func projectAvailability() -> Action<ProjectConfig, AvailabilityCheckState, NoError> {
         return Action {
             (input: ProjectConfig) -> SignalProducer<AvailabilityCheckState, NoError> in
             

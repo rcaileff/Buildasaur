@@ -11,28 +11,28 @@ import ReactiveCocoa
 import Result
 
 public protocol BuildStatusCreator {
-    func createStatusFromState(state: BuildState, description: String?, targetUrl: String?) -> StatusType
+    func createStatusFromState(_ state: BuildState, description: String?, targetUrl: String?) -> StatusType
 }
 
 public protocol SourceServerType: BuildStatusCreator {
     
-    func getBranchesOfRepo(repo: String, completion: (branches: [BranchType]?, error: ErrorType?) -> ())
-    func getOpenPullRequests(repo: String, completion: (prs: [PullRequestType]?, error: ErrorType?) -> ())
-    func getPullRequest(pullRequestNumber: Int, repo: String, completion: (pr: PullRequestType?, error: ErrorType?) -> ())
-    func getRepo(repo: String, completion: (repo: RepoType?, error: ErrorType?) -> ())
-    func getStatusOfCommit(commit: String, repo: String, completion: (status: StatusType?, error: ErrorType?) -> ())
-    func postStatusOfCommit(commit: String, status: StatusType, repo: String, completion: (status: StatusType?, error: ErrorType?) -> ())
-    func postCommentOnIssue(comment: String, issueNumber: Int, repo: String, completion: (comment: CommentType?, error: ErrorType?) -> ())
-    func getCommentsOfIssue(issueNumber: Int, repo: String, completion: (comments: [CommentType]?, error: ErrorType?) -> ())
+    func getBranchesOfRepo(_ repo: String, completion: (_ branches: [BranchType]?, _ error: Error?) -> ())
+    func getOpenPullRequests(_ repo: String, completion: (_ prs: [PullRequestType]?, _ error: Error?) -> ())
+    func getPullRequest(_ pullRequestNumber: Int, repo: String, completion: (_ pr: PullRequestType?, _ error: Error?) -> ())
+    func getRepo(_ repo: String, completion: (_ repo: RepoType?, _ error: Error?) -> ())
+    func getStatusOfCommit(_ commit: String, repo: String, completion: (_ status: StatusType?, _ error: Error?) -> ())
+    func postStatusOfCommit(_ commit: String, status: StatusType, repo: String, completion: (_ status: StatusType?, _ error: Error?) -> ())
+    func postCommentOnIssue(_ comment: String, issueNumber: Int, repo: String, completion: (_ comment: CommentType?, _ error: Error?) -> ())
+    func getCommentsOfIssue(_ issueNumber: Int, repo: String, completion: (_ comments: [CommentType]?, _ error: Error?) -> ())
     
     func authChangedSignal() -> Signal<ProjectAuthenticator?, NoError>
 }
 
-public class SourceServerFactory {
+open class SourceServerFactory {
     
     public init() { }
     
-    public func createServer(service: GitService, auth: ProjectAuthenticator?) -> SourceServerType {
+    open func createServer(_ service: GitService, auth: ProjectAuthenticator?) -> SourceServerType {
         
         if let auth = auth {
             precondition(service.type() == auth.service.type())
@@ -86,11 +86,11 @@ public protocol PullRequestType: IssueType {
 }
 
 public enum BuildState {
-    case NoState
-    case Pending
-    case Success
-    case Error
-    case Failure
+    case noState
+    case pending
+    case success
+    case error
+    case failure
 }
 
 public protocol StatusType {
@@ -102,7 +102,7 @@ public protocol StatusType {
 
 extension StatusType {
     
-    public func isEqual(rhs: StatusType) -> Bool {
+    public func isEqual(_ rhs: StatusType) -> Bool {
         let lhs = self
         return lhs.state == rhs.state && lhs.description == rhs.description
     }

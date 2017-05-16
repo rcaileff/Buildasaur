@@ -11,7 +11,7 @@ import XcodeServerSDK
 import BuildaGitServer
 import BuildaUtils
 
-public class SyncPairBranchResolver: SyncPairResolver {
+open class SyncPairBranchResolver: SyncPairResolver {
     
     
 }

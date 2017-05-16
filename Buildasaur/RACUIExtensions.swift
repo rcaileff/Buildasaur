@@ -15,7 +15,7 @@ import Result
 
 //book keeping
 
-func lazyAssociatedProperty<T: AnyObject>(host: AnyObject, key: UnsafePointer<Void>, factory: () -> T) -> T {
+func lazyAssociatedProperty<T: AnyObject>(_ host: AnyObject, key: UnsafeRawPointer, factory: () -> T) -> T {
     
     let obj: T? = getAssociatedProperty(host, key: key) as? T
     if let object = obj {
@@ -27,15 +27,15 @@ func lazyAssociatedProperty<T: AnyObject>(host: AnyObject, key: UnsafePointer<Vo
     return associatedProperty
 }
 
-func setAssociatedProperty<T: AnyObject>(host: AnyObject, key: UnsafePointer<Void>, value: T) {
+func setAssociatedProperty<T: AnyObject>(_ host: AnyObject, key: UnsafeRawPointer, value: T) {
     objc_setAssociatedObject(host, key, value, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN)
 }
 
-func getAssociatedProperty(host: AnyObject, key: UnsafePointer<Void>) -> AnyObject! {
-    return objc_getAssociatedObject(host, key)
+func getAssociatedProperty(_ host: AnyObject, key: UnsafeRawPointer) -> AnyObject! {
+    return objc_getAssociatedObject(host, key) as AnyObject
 }
 
-func lazyMutableProperty<T>(host: AnyObject, key: UnsafePointer<Void>, setter: (T) -> (), getter: () -> T) -> MutableProperty<T> {
+func lazyMutableProperty<T>(_ host: AnyObject, key: UnsafeRawPointer, setter: @escaping (T) -> (), getter: @escaping () -> T) -> MutableProperty<T> {
     return lazyAssociatedProperty(host, key: key) {
         let property = MutableProperty<T>(getter())
         property.producer

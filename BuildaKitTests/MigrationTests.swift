@@ -18,35 +18,35 @@ class MigrationTests: XCTestCase {
         Ref.reset()
     }
     
-    func testBundle() -> NSBundle {
+    func testBundle() -> Bundle {
         
-        let bundle = NSBundle(forClass: MigrationTests.classForCoder())
+        let bundle = Bundle(for: MigrationTests.classForCoder())
         return bundle
     }
     
-    func resourceURLFromTestBundle(name: String) -> NSURL {
-        return self.testBundle().URLForResource(name, withExtension: nil)!
+    func resourceURLFromTestBundle(_ name: String) -> URL {
+        return self.testBundle().url(forResource: name, withExtension: nil)!
     }
     
-    func writingURL(name: String) -> NSURL {
+    func writingURL(_ name: String) -> URL {
         let dir = NSTemporaryDirectory()
 //        let dir = "/Users/honzadvorsky/Desktop/TestLocation/"
-        let path = (dir as NSString).stringByAppendingPathComponent(name)
-        let writingURL = NSURL(fileURLWithPath: path, isDirectory: true)
+        let path = (dir as NSString).appendingPathComponent(name)
+        let writingURL = URL(fileURLWithPath: path, isDirectory: true)
         
         //delete the folder first
-        _ = try? NSFileManager.defaultManager().removeItemAtURL(writingURL)
+        _ = try? FileManager.default.removeItem(at: writingURL)
         
         return writingURL
     }
     
-    enum HierarchyError: ErrorType {
-        case DifferentFileNames(real: String?, expected: String?)
-        case DifferentFileContents(file: String?)
-        case DifferentFolderContents(real: [String], expected: [String])
+    enum HierarchyError: Error {
+        case differentFileNames(real: String?, expected: String?)
+        case differentFileContents(file: String?)
+        case differentFolderContents(real: [String], expected: [String])
     }
     
-    func ensureEqualHierarchies(persistence: Persistence, urlExpected: NSURL, urlReal: NSURL) throws {
+    func ensureEqualHierarchies(_ persistence: Persistence, urlExpected: URL, urlReal: URL) throws {
         
         if !urlReal.hasDirectoryPath {
             
@@ -54,13 +54,13 @@ class MigrationTests: XCTestCase {
             let real = urlReal.lastPathComponent
             
             if exp != real {
-                throw HierarchyError.DifferentFileNames(real: real, expected: exp)
+                throw HierarchyError.differentFileNames(real: real, expected: exp)
             }
             
-            let expData = NSData(contentsOfURL: urlExpected)
-            let realData = NSData(contentsOfURL: urlReal)
+            let expData = try? Data(contentsOf: urlExpected)
+            let realData = try? Data(contentsOf: urlReal)
             if expData != realData {
-                throw HierarchyError.DifferentFileContents(file: real)
+                throw HierarchyError.differentFileContents(file: real)
             }
             return
         }
@@ -87,7 +87,7 @@ class MigrationTests: XCTestCase {
         let writingURL = self.writingURL("v0-v1")
         let expectedURL = self.resourceURLFromTestBundle("Buildasaur-format-1-example1")
         
-        let fileManager = NSFileManager.defaultManager()
+        let fileManager = FileManager.default
         
         let persistence = Persistence(readingFolder: readingURL, writingFolder: writingURL, fileManager: fileManager)
         let migrator = Migrator_v0_v1(persistence: persistence)
@@ -106,7 +106,7 @@ class MigrationTests: XCTestCase {
         let writingURL = self.writingURL("v1-v2")
         let expectedURL = self.resourceURLFromTestBundle("Buildasaur-format-2-example1")
         
-        let fileManager = NSFileManager.defaultManager()
+        let fileManager = FileManager.default
         
         let persistence = Persistence(readingFolder: readingURL, writingFolder: writingURL, fileManager: fileManager)
         let migrator = Migrator_v1_v2(persistence: persistence)
@@ -125,7 +125,7 @@ class MigrationTests: XCTestCase {
         let writingURL = self.writingURL("v2-v3")
         let expectedURL = self.resourceURLFromTestBundle("Buildasaur-format-3-example1")
         
-        let fileManager = NSFileManager.defaultManager()
+        let fileManager = FileManager.default
         
         let persistence = Persistence(readingFolder: readingURL, writingFolder: writingURL, fileManager: fileManager)
         let migrator = Migrator_v2_v3(persistence: persistence)
@@ -140,15 +140,15 @@ class MigrationTests: XCTestCase {
     
     func testPersistenceSetter() {
         
-        let tmp = NSURL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
-        let persistence1 = Persistence(readingFolder: tmp, writingFolder: tmp, fileManager: NSFileManager.defaultManager())
+        let tmp = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+        let persistence1 = Persistence(readingFolder: tmp, writingFolder: tmp, fileManager: FileManager.defaultManager())
         
         let migrator = CompositeMigrator(persistence: persistence1)
         for i in migrator.childMigrators {
             expect(i.persistence) === persistence1
         }
         
-        let persistence2 = Persistence(readingFolder: tmp, writingFolder: tmp, fileManager: NSFileManager.defaultManager())
+        let persistence2 = Persistence(readingFolder: tmp, writingFolder: tmp, fileManager: FileManager.defaultManager())
         migrator.persistence = persistence2
         
         for i in migrator.childMigrators {

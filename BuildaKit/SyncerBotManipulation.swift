@@ -15,7 +15,7 @@ extension StandardSyncer {
     
     //MARK: Bot manipulation utils
     
-    func cancelIntegrations(integrations: [Integration], completion: () -> ()) {
+    func cancelIntegrations(_ integrations: [Integration], completion: () -> ()) {
         
         integrations.mapVoidAsync({ (integration, itemCompletion) -> () in
             
@@ -31,7 +31,7 @@ extension StandardSyncer {
             }, completion: completion)
     }
     
-    func deleteBot(bot: Bot, completion: () -> ()) {
+    func deleteBot(_ bot: Bot, completion: @escaping () -> ()) {
         
         self._xcodeServer.deleteBot(bot.id, revision: bot.rev, completion: { (success, error) -> () in
             
@@ -44,7 +44,7 @@ extension StandardSyncer {
         })
     }
     
-    private func createBotFromName(botName: String, branch: String, repo: RepoType, completion: () -> ()) {
+    fileprivate func createBotFromName(_ botName: String, branch: String, repo: RepoType, completion: @escaping () -> ()) {
         
         /*
         synced bots must have a manual schedule, Builda tells the bot to reintegrate in case of a new commit.
@@ -90,7 +90,7 @@ extension StandardSyncer {
         }
     }
     
-    func createBotFromPR(pr: PullRequestType, completion: () -> ()) {
+    func createBotFromPR(_ pr: PullRequestType, completion: () -> ()) {
         
         let branchName = pr.headName
         let botName = BotNaming.nameForBotWithPR(pr, repoName: self.repoName()!)
@@ -98,7 +98,7 @@ extension StandardSyncer {
         self.createBotFromName(botName, branch: branchName, repo: pr.headRepo, completion: completion)
     }
     
-    func createBotFromBranch(branch: BranchType, repo: RepoType, completion: () -> ()) {
+    func createBotFromBranch(_ branch: BranchType, repo: RepoType, completion: () -> ()) {
         
         let branchName = branch.name
         let botName = BotNaming.nameForBotWithBranch(branch, repoName: self.repoName()!)

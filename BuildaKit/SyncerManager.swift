@@ -16,22 +16,22 @@ import BuildaUtils
 //owns running syncers and their children, manages starting/stopping them,
 //creating them from configurations
 
-public class SyncerManager {
+open class SyncerManager {
     
-    public let storageManager: StorageManager
-    public let factory: SyncerFactoryType
-    public let loginItem: LoginItem
+    open let storageManager: StorageManager
+    open let factory: SyncerFactoryType
+    open let loginItem: LoginItem
     
-    public let syncersProducer: SignalProducer<[StandardSyncer], NoError>
-    public let projectsProducer: SignalProducer<[Project], NoError>
-    public let serversProducer: SignalProducer<[XcodeServer], NoError>
+    open let syncersProducer: SignalProducer<[StandardSyncer], NoError>
+    open let projectsProducer: SignalProducer<[Project], NoError>
+    open let serversProducer: SignalProducer<[XcodeServer], NoError>
     
-    public let buildTemplatesProducer: SignalProducer<[BuildTemplate], NoError>
-    public let triggerProducer: SignalProducer<[Trigger], NoError>
+    open let buildTemplatesProducer: SignalProducer<[BuildTemplate], NoError>
+    open let triggerProducer: SignalProducer<[Trigger], NoError>
     
-    public var syncers: [StandardSyncer]
-    private var configTriplets: SignalProducer<[ConfigTriplet], NoError>
-    public var heartbeatManager: HeartbeatManager?
+    open var syncers: [StandardSyncer]
+    fileprivate var configTriplets: SignalProducer<[ConfigTriplet], NoError>
+    open var heartbeatManager: HeartbeatManager?
 
     public init(storageManager: StorageManager, factory: SyncerFactoryType, loginItem: LoginItem) {
         
@@ -61,8 +61,8 @@ public class SyncerManager {
         self.setupHeartbeatManager()
     }
     
-    private func setupHeartbeatManager() {
-        if let heartbeatOptOut = self.storageManager.config.value["heartbeat_opt_out"] as? Bool where heartbeatOptOut {
+    fileprivate func setupHeartbeatManager() {
+        if let heartbeatOptOut = self.storageManager.config.value["heartbeat_opt_out"] as? Bool, heartbeatOptOut {
             Log.info("User opted out of anonymous heartbeat")
         } else {
             Log.info("Will send anonymous heartbeat. To opt out add `\"heartbeat_opt_out\" = true` to ~/Library/Application Support/Buildasaur/Config.json")
@@ -72,26 +72,26 @@ public class SyncerManager {
         }
     }
     
-    private func checkForAutostart() {
-        guard let autostart = self.storageManager.config.value["autostart"] as? Bool where autostart else { return }
+    fileprivate func checkForAutostart() {
+        guard let autostart = self.storageManager.config.value["autostart"] as? Bool, autostart else { return }
         self.syncers.forEach { $0.active = true }
     }
     
-    public func xcodeServerWithRef(ref: RefType) -> SignalProducer<XcodeServer?, NoError> {
+    open func xcodeServerWithRef(_ ref: RefType) -> SignalProducer<XcodeServer?, NoError> {
         
         return self.serversProducer.map { allServers -> XcodeServer? in
             return allServers.filter { $0.config.id == ref }.first
         }
     }
     
-    public func projectWithRef(ref: RefType) -> SignalProducer<Project?, NoError> {
+    open func projectWithRef(_ ref: RefType) -> SignalProducer<Project?, NoError> {
         
         return self.projectsProducer.map { allProjects -> Project? in
             return allProjects.filter { $0.config.value.id == ref }.first
         }
     }
     
-    public func syncerWithRef(ref: RefType) -> SignalProducer<StandardSyncer?, NoError> {
+    open func syncerWithRef(_ ref: RefType) -> SignalProducer<StandardSyncer?, NoError> {
         
         return self.syncersProducer.map { allSyncers -> StandardSyncer? in
             return allSyncers.filter { $0.config.value.id == ref }.first
@@ -102,11 +102,11 @@ public class SyncerManager {
         self.stopSyncers()
     }
     
-    public func startSyncers() {
+    open func startSyncers() {
         self.syncers.forEach { $0.active = true }
     }
 
-    public func stopSyncers() {
+    open func stopSyncers() {
         self.syncers.forEach { $0.active = false }
     }
 }

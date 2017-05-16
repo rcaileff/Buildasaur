@@ -11,7 +11,7 @@ import XcodeServerSDK
 
 extension Project {
     
-    public func createSourceControlBlueprint(branch: String) -> SourceControlBlueprint {
+    public func createSourceControlBlueprint(_ branch: String) -> SourceControlBlueprint {
         
         let workspaceMetadata = self.workspaceMetadata!
         

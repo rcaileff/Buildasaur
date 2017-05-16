@@ -30,23 +30,23 @@ public struct ProjectAuthenticator {
 }
 
 public protocol KeychainStringSerializable {
-    static func fromString(value: String) throws -> Self
+    static func fromString(_ value: String) throws -> Self
     func toString() -> String
 }
 
 extension ProjectAuthenticator: KeychainStringSerializable {
     
-    public static func fromString(value: String) throws -> ProjectAuthenticator {
+    public static func fromString(_ value: String) throws -> ProjectAuthenticator {
         
-        let comps = value.componentsSeparatedByString(":")
+        let comps = value.components(separatedBy: ":")
         guard comps.count >= 4 else { throw Error.withInfo("Corrupted keychain string") }
 
         var service: GitService
         switch comps[0] {
-        case GitService.GitHub.hostname():
-            service = GitService.GitHub
-        case GitService.BitBucket.hostname():
-            service = GitService.BitBucket
+        case GitService.gitHub.hostname():
+            service = GitService.gitHub
+        case GitService.bitBucket.hostname():
+            service = GitService.bitBucket
         default:
             let host = comps[0]
             guard let maybeService = GitService.createEnterpriseService(host) else {
@@ -59,7 +59,7 @@ extension ProjectAuthenticator: KeychainStringSerializable {
             throw Error.withInfo("Unsupported auth type: \(comps[2])")
         }
         //join the rest back in case we have ":" in the token
-        let remaining = comps.dropFirst(3).joinWithSeparator(":")
+        let remaining = comps.dropFirst(3).joined(separator: ":")
         let auth = ProjectAuthenticator(service: service, username: comps[1], type: type, secret: remaining)
         return auth
     }
@@ -71,6 +71,6 @@ extension ProjectAuthenticator: KeychainStringSerializable {
             self.username,
             self.type.rawValue,
             self.secret
-            ].joinWithSeparator(":")
+            ].joined(separator: ":")
     }
 }

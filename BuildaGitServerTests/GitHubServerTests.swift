@@ -28,9 +28,9 @@ class GitHubSourceTests: XCTestCase {
         super.tearDown()
     }
 
-    func tryEndpoint(method: HTTP.Method, endpoint: GitHubEndpoints.Endpoint, params: [String: String]?, completion: (body: AnyObject!, error: NSError!) -> ()) {
+    func tryEndpoint(_ method: HTTP.Method, endpoint: GitHubEndpoints.Endpoint, params: [String: String]?, completion: @escaping (_ body: AnyObject?, _ error: NSError?) -> ()) {
         
-        let expect = expectationWithDescription("Waiting for url request")
+        let expect = expectation(description: "Waiting for url request")
         
         let request = try! self.github.endpoints.createRequest(method, endpoint: endpoint, params: params)
         
@@ -40,7 +40,7 @@ class GitHubSourceTests: XCTestCase {
             expect.fulfill()
         })
         
-        waitForExpectationsWithTimeout(10, handler: nil)
+        waitForExpectations(timeout: 10, handler: nil)
     }
     
     func testGetPullRequests() {
@@ -138,7 +138,7 @@ class GitHubSourceTests: XCTestCase {
         let dictionary = [
             "name": "master",
             "commit": commitDictionary
-        ]
+        ] as [String : Any]
         
         let branch = try! GitHubBranch(json: dictionary)
         XCTAssertEqual(branch.name, "master")
@@ -172,7 +172,7 @@ class GitHubSourceTests: XCTestCase {
                 "ssh_url": "git@github.com:aleclarson/AsyncDisplayKit.git",
                 "clone_url": "https://github.com/aleclarson/AsyncDisplayKit.git",
             ]
-        ]
+        ] as [String : Any]
         
         let prbranch = try! GitHubPullRequestBranch(json: dictionary)
         XCTAssertEqual(prbranch.ref, "fb-loadNode")

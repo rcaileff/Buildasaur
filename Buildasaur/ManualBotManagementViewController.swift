@@ -25,7 +25,7 @@ class ManualBotManagementViewController: NSViewController {
     
     @IBOutlet weak var creatingActivityIndicator: NSProgressIndicator!
     
-    private var buildTemplates: [BuildTemplate] {
+    fileprivate var buildTemplates: [BuildTemplate] {
         return Array(self.storageManager.buildTemplates.value.values)
             .sort {$0.id < $1.id }
     }
@@ -50,13 +50,13 @@ class ManualBotManagementViewController: NSViewController {
         }
     }
     
-    func fetchBranches(completion: ([BranchType]?, ErrorType?) -> ()) {
+    func fetchBranches(_ completion: ([BranchType]?, ErrorType?) -> ()) {
         
         self.branchActivityIndicator.startAnimation(nil)
         let repoName = self.syncer.project.serviceRepoName()!
         self.syncer.sourceServer.getBranchesOfRepo(repoName, completion: { (branches, error) -> () in
             
-            NSOperationQueue.mainQueue().addOperationWithBlock({ () -> Void in
+            OperationQueue.mainQueue().addOperationWithBlock({ () -> Void in
                 
                 self.branchComboBox.removeAllItems()
                 if let branches = branches {
@@ -82,7 +82,7 @@ class ManualBotManagementViewController: NSViewController {
     
     func pullBranchName() -> String? {
         
-        if let branch = self.branchComboBox.objectValueOfSelectedItem as? String where !branch.isEmpty {
+        if let branch = self.branchComboBox.objectValueOfSelectedItem as? String, !branch.isEmpty {
             return branch
         }
         UIUtils.showAlertWithText("Please specify a valid branch")
@@ -135,11 +135,11 @@ class ManualBotManagementViewController: NSViewController {
         }
     }
     
-    @IBAction func cancelTapped(sender: AnyObject) {
-        self.dismissController(nil)
+    @IBAction func cancelTapped(_ sender: AnyObject) {
+        self.dismiss(nil)
     }
     
-    @IBAction func createTapped(sender: AnyObject) {
+    @IBAction func createTapped(_ sender: AnyObject) {
         self.createBot()
     }
 

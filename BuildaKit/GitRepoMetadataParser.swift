@@ -16,9 +16,9 @@ class GitRepoMetadataParser: SourceControlFileParser {
         return [] //takes anything
     }
     
-    private typealias ScriptRun = (String) throws -> String
+    fileprivate typealias ScriptRun = (String) throws -> String
     
-    private func parseOrigin(run: ScriptRun) throws -> String {
+    fileprivate func parseOrigin(_ run: ScriptRun) throws -> String {
         
         //find the first origin ending with "(fetch)"
         let remotes = try run("git remote -v")
@@ -37,7 +37,7 @@ class GitRepoMetadataParser: SourceControlFileParser {
         //parse the fetch remote, which is
         //e.g. "origin\tgit@github.com:czechboy0/BuildaUtils.git (fetch)"
         let comps = remoteLine
-            .componentsSeparatedByCharactersInSet(NSCharacterSet(charactersInString: "\t "))
+            .components(separatedBy: CharacterSet(charactersIn: "\t "))
             .filter { !$0.isEmpty }
         
         //we need at least 2 comps, take the second
@@ -51,10 +51,10 @@ class GitRepoMetadataParser: SourceControlFileParser {
         return remote
     }
     
-    private func parseProjectName(url: NSURL) throws -> String {
+    fileprivate func parseProjectName(_ url: URL) throws -> String {
         
         //that's the name of the passed-in project/workspace (most of the times)
-        let projectName = ((url.lastPathComponent ?? "") as NSString).stringByDeletingPathExtension
+        let projectName = ((url.lastPathComponent ?? "") as NSString).deletingPathExtension
         
         guard !projectName.isEmpty else {
             throw Error.withInfo("Failed to parse project name from url \(url)")
@@ -62,11 +62,11 @@ class GitRepoMetadataParser: SourceControlFileParser {
         return projectName
     }
     
-    private func parseProjectPath(url: NSURL, run: ScriptRun) throws -> String {
+    fileprivate func parseProjectPath(_ url: URL, run: ScriptRun) throws -> String {
         
         //relative path from the root of the git repo of the passed-in project
         //or workspace file
-        let absolutePath = url.path!
+        let absolutePath = url.path
         let relativePath = "git ls-tree --full-name --name-only HEAD \"\(absolutePath)\""
         let outPath = try run(relativePath)
         let trimmed = outPath.trim()
@@ -76,7 +76,7 @@ class GitRepoMetadataParser: SourceControlFileParser {
         return trimmed
     }
     
-    private func parseProjectWCCName(url: NSURL, projectPath: String) throws -> String {
+    fileprivate func parseProjectWCCName(_ url: URL, projectPath: String) throws -> String {
         
         //this is the folder name containing the git repo
         //it's the folder name before the project path
@@ -101,7 +101,7 @@ class GitRepoMetadataParser: SourceControlFileParser {
         return containingFolder
     }
     
-    private func parseProjectWCCIdentifier(projectUrl: String) throws -> String {
+    fileprivate func parseProjectWCCIdentifier(_ projectUrl: String) throws -> String {
         
         //something reproducible, but i can't figure out how Xcode generates this.
         //also - it doesn't matter, AFA it's unique
@@ -109,12 +109,12 @@ class GitRepoMetadataParser: SourceControlFileParser {
         return hashed
     }
     
-    func parseFileAtUrl(url: NSURL) throws -> WorkspaceMetadata {
+    func parseFileAtUrl(_ url: URL) throws -> WorkspaceMetadata {
         
         let run = { (script: String) throws -> String in
             
-            let cd = "cd \"\(url.path!)\""
-            let all = [cd, script].joinWithSeparator("\n")
+            let cd = "cd \"\(url.path)\""
+            let all = [cd, script].joined(separator: "\n")
             let response = Script.runTemporaryScript(all)
             if response.terminationStatus != 0 {
                 throw Error.withInfo("Parsing git repo metadata failed, executing \"\(all)\", status: \(response.terminationStatus), output: \(response.standardOutput), error: \(response.standardError)")
@@ -134,12 +134,12 @@ class GitRepoMetadataParser: SourceControlFileParser {
 
 extension String {
     
-    func split(separator: String) -> [String] {
-        return self.componentsSeparatedByString(separator)
+    func split(_ separator: String) -> [String] {
+        return self.components(separatedBy: separator)
     }
     
     func trim() -> String {
-        return self.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
+        return self.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
     }
 }
 

@@ -16,8 +16,8 @@ import Result
 
 protocol SyncerViewControllerDelegate: class {
     
-    func didCancelEditingOfSyncerConfig(config: SyncerConfig)
-    func didSaveSyncerConfig(config: SyncerConfig)
+    func didCancelEditingOfSyncerConfig(_ config: SyncerConfig)
+    func didSaveSyncerConfig(_ config: SyncerConfig)
     func didRequestEditing()
 }
 
@@ -31,7 +31,7 @@ class SyncerViewController: ConfigEditViewController {
     
     weak var delegate: SyncerViewControllerDelegate?
     
-    private let syncer = MutableProperty<StandardSyncer?>(nil)
+    fileprivate let syncer = MutableProperty<StandardSyncer?>(nil)
     
     @IBOutlet weak var editButton: NSButton!
     @IBOutlet weak var statusTextField: NSTextField!
@@ -51,12 +51,12 @@ class SyncerViewController: ConfigEditViewController {
     @IBOutlet weak var manualBotManagementButton: NSButton!
     @IBOutlet weak var branchWatchingButton: NSButton!
     
-    private let isSyncing = MutableProperty<Bool>(false)
+    fileprivate let isSyncing = MutableProperty<Bool>(false)
     
-    private let syncInterval = MutableProperty<Double>(15)
-    private let watchedBranches = MutableProperty<[String]>([])
+    fileprivate let syncInterval = MutableProperty<Double>(15)
+    fileprivate let watchedBranches = MutableProperty<[String]>([])
     
-    private let generatedConfig = MutableProperty<SyncerConfig!>(nil)
+    fileprivate let generatedConfig = MutableProperty<SyncerConfig!>(nil)
     
     //----
     
@@ -210,15 +210,15 @@ class SyncerViewController: ConfigEditViewController {
         })
     }
     
-    @IBAction func startStopButtonTapped(sender: AnyObject) {
+    @IBAction func startStopButtonTapped(_ sender: AnyObject) {
         self.toggleActive()
     }
     
-    @IBAction func editButtonClicked(sender: AnyObject) {
+    @IBAction func editButtonClicked(_ sender: AnyObject) {
         self.editClicked()
     }
     
-    private func editClicked() {
+    fileprivate func editClicked() {
         self.delegate?.didRequestEditing()
     }
     
@@ -227,7 +227,7 @@ class SyncerViewController: ConfigEditViewController {
         return true
     }
     
-    private func toggleActive() {
+    fileprivate func toggleActive() {
         
         let isSyncing = self.isSyncing.value
         
@@ -254,7 +254,7 @@ class SyncerViewController: ConfigEditViewController {
         }
     }
     
-    private func save() {
+    fileprivate func save() {
         let newConfig = self.generatedConfig.value
         self.storageManager.addSyncerConfig(newConfig)
         self.delegate?.didSaveSyncerConfig(newConfig)
@@ -265,25 +265,25 @@ extension SyncerViewController {
     
     //MARK: handling branch watching, manual bot management and link opening
     
-    @IBAction func branchWatchingTapped(sender: AnyObject) {
+    @IBAction func branchWatchingTapped(_ sender: AnyObject) {
         precondition(self.syncer.value != nil)
-        self.performSegueWithIdentifier("showBranchWatching", sender: self)
+        self.performSegue(withIdentifier: "showBranchWatching", sender: self)
     }
     
-    @IBAction func manualBotManagementTapped(sender: AnyObject) {
+    @IBAction func manualBotManagementTapped(_ sender: AnyObject) {
         precondition(self.syncer.value != nil)
-        self.performSegueWithIdentifier("showManual", sender: self)
+        self.performSegue(withIdentifier: "showManual", sender: self)
     }
     
-    @IBAction func helpLttmButtonTapped(sender: AnyObject) {
+    @IBAction func helpLttmButtonTapped(_ sender: AnyObject) {
         openLink("https://github.com/czechboy0/Buildasaur/blob/master/README.md#unlock-the-lttm-barrier")
     }
     
-    @IBAction func helpPostStatusCommentsButtonTapped(sender: AnyObject) {
+    @IBAction func helpPostStatusCommentsButtonTapped(_ sender: AnyObject) {
         openLink("https://github.com/czechboy0/Buildasaur/blob/master/README.md#envelope-posting-status-comments")
     }
     
-    override func prepareForSegue(segue: NSStoryboardSegue, sender: AnyObject?) {
+    override func prepare(for segue: NSStoryboardSegue, sender: Any?) {
         
         if let manual = segue.destinationController as? ManualBotManagementViewController {
             manual.syncer = self.syncer.value
@@ -299,7 +299,7 @@ extension SyncerViewController {
 
 extension SyncerViewController: BranchWatchingViewControllerDelegate {
     
-    func didUpdateWatchedBranches(branches: [String]) {
+    func didUpdateWatchedBranches(_ branches: [String]) {
         self.watchedBranches.value = branches
         self.save()
     }
@@ -326,7 +326,7 @@ extension SyncerViewController {
         }
     }
     
-    static func stringForEvent(event: SyncerEventType, syncer: Syncer) -> String {
+    static func stringForEvent(_ event: SyncerEventType, syncer: Syncer) -> String {
         
         switch event {
         case .DidBecomeActive:
@@ -344,15 +344,15 @@ extension SyncerViewController {
         }
     }
     
-    static func syncerBecameActive(syncer: Syncer) -> String {
+    static func syncerBecameActive(_ syncer: Syncer) -> String {
         return self.report("Syncer is now active...", syncer: syncer)
     }
     
-    static func syncerStopped(syncer: Syncer) -> String {
+    static func syncerStopped(_ syncer: Syncer) -> String {
         return self.report("Syncer is stopped", syncer: syncer)
     }
     
-    static func syncerDidStartSyncing(syncer: Syncer) -> String {
+    static func syncerDidStartSyncing(_ syncer: Syncer) -> String {
         
         var messages = [
             "Syncing in progress..."
@@ -366,7 +366,7 @@ extension SyncerViewController {
         return self.reportMultiple(messages, syncer: syncer)
     }
     
-    static func syncerDidFinishSyncing(syncer: Syncer) -> String {
+    static func syncerDidFinishSyncing(_ syncer: Syncer) -> String {
         
         var messages = [
             "Syncer is Idle... Waiting for the next sync...",
@@ -388,15 +388,15 @@ extension SyncerViewController {
         return self.reportMultiple(messages, syncer: syncer)
     }
     
-    static func syncerEncounteredError(syncer: Syncer, error: ErrorType) -> String {
+    static func syncerEncounteredError(_ syncer: Syncer, error: Error) -> String {
         return self.report("Error: \((error as NSError).localizedDescription)", syncer: syncer)
     }
     
-    static func report(string: String, syncer: Syncer) -> String {
+    static func report(_ string: String, syncer: Syncer) -> String {
         return self.reportMultiple([string], syncer: syncer)
     }
     
-    static func reportMultiple(strings: [String], syncer: Syncer) -> String {
+    static func reportMultiple(_ strings: [String], syncer: Syncer) -> String {
         
         var itemsToReport = [String]()
         

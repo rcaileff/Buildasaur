@@ -9,9 +9,9 @@
 import Foundation
 import BuildaUtils
 
-public class SSHKeyVerification {
+open class SSHKeyVerification {
     
-    private class func findXcodeDeveloperFolder() -> String {
+    fileprivate class func findXcodeDeveloperFolder() -> String {
         
         //first find xcode's developer folder, in case user has a renamed xcode
         let found = Script.run("xcode-select", arguments: ["-p"])
@@ -25,13 +25,13 @@ public class SSHKeyVerification {
         }
     }
     
-    public class func verifyBlueprint(blueprint: NSDictionary) -> Script.ScriptResponse {
+    open class func verifyBlueprint(_ blueprint: NSDictionary) -> Script.ScriptResponse {
         
         do {
             //convert dictionary into string
-            let data = try NSJSONSerialization.dataWithJSONObject(blueprint, options: NSJSONWritingOptions())
+            let data = try JSONSerialization.data(withJSONObject: blueprint, options: JSONSerialization.WritingOptions())
             
-            let scriptString = NSString(data: data, encoding: NSUTF8StringEncoding)!
+            let scriptString = NSString(data: data, encoding: String.Encoding.utf8.rawValue)!
             
             let xcodePath = self.findXcodeDeveloperFolder()
             let xcsbridgePath = "\(xcodePath)/usr/bin/xcsbridge"
@@ -47,8 +47,8 @@ public class SSHKeyVerification {
             //parse the response as json
             let responseString = response.standardOutput
             if
-                let data = responseString.dataUsingEncoding(NSUTF8StringEncoding),
-                let obj = try NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions.AllowFragments) as? NSDictionary
+                let data = responseString.dataUsingEncoding(String.Encoding.utf8),
+                let obj = try JSONSerialization.JSONObjectWithData(data, options: JSONSerialization.ReadingOptions.AllowFragments) as? NSDictionary
             {
                 
                 //valid output is an empty dictionary

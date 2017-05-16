@@ -12,23 +12,23 @@ import BuildaGitServer
 
 class BotNaming {
     
-    class func isBuildaBot(bot: Bot) -> Bool {
+    class func isBuildaBot(_ bot: Bot) -> Bool {
         return bot.name.hasPrefix(self.prefixForBuildaBot())
     }
     
-    class func isBuildaBotBelongingToRepoWithName(bot: Bot, repoName: String) -> Bool {
+    class func isBuildaBotBelongingToRepoWithName(_ bot: Bot, repoName: String) -> Bool {
         return bot.name.hasPrefix(self.prefixForBuildaBotInRepoWithName(repoName))
     }
     
-    class func nameForBotWithBranch(branch: BranchType, repoName: String) -> String {
+    class func nameForBotWithBranch(_ branch: BranchType, repoName: String) -> String {
         return "\(self.prefixForBuildaBotInRepoWithName(repoName)) |-> \(branch.name)"
     }
     
-    class func nameForBotWithPR(pr: PullRequestType, repoName: String) -> String {
+    class func nameForBotWithPR(_ pr: PullRequestType, repoName: String) -> String {
         return "\(self.prefixForBuildaBotInRepoWithName(repoName)) PR #\(pr.number)"
     }
     
-    class func prefixForBuildaBotInRepoWithName(repoName: String) -> String {
+    class func prefixForBuildaBotInRepoWithName(_ repoName: String) -> String {
         return "\(self.prefixForBuildaBot()) [\(repoName)]"
     }
     

@@ -11,9 +11,9 @@ import Cocoa
 import BuildaUtils
 import XcodeServerSDK
 
-public class StorageUtils {
+open class StorageUtils {
     
-    public class func openWorkspaceOrProject() -> NSURL? {
+    open class func openWorkspaceOrProject() -> URL? {
         
         let openPanel = NSOpenPanel()
         openPanel.canChooseDirectories = false
@@ -26,8 +26,8 @@ public class StorageUtils {
         
         switch clicked {
         case NSFileHandlingPanelOKButton:
-            let url = openPanel.URL
-            let urlOrEmpty = url ?? NSURL()
+            let url = openPanel.url
+            let urlOrEmpty = url ?? URL()
             Log.info("Project: \(urlOrEmpty)")
             return url
         default:
@@ -37,7 +37,7 @@ public class StorageUtils {
         return nil
     }
     
-    public class func openSSHKey(publicOrPrivate: String) -> NSURL? {
+    open class func openSSHKey(_ publicOrPrivate: String) -> URL? {
         
         let openPanel = NSOpenPanel()
         openPanel.canChooseDirectories = false
@@ -51,7 +51,7 @@ public class StorageUtils {
         
         switch clicked {
         case NSFileHandlingPanelOKButton:
-            let url = openPanel.URL
+            let url = openPanel.url
             Log.info("Key: \(url)")
             return url
         default:

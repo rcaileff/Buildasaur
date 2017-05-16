@@ -11,17 +11,17 @@ import BuildaGitServer
 import XcodeServerSDK
 import ReactiveCocoa
 
-public class StandardSyncer : Syncer {
+open class StandardSyncer : Syncer {
     
-    public var sourceServer: SourceServerType
-    public var xcodeServer: XcodeServer
-    public var project: Project
-    public var buildTemplate: BuildTemplate
-    public var triggers: [Trigger]
+    open var sourceServer: SourceServerType
+    open var xcodeServer: XcodeServer
+    open var project: Project
+    open var buildTemplate: BuildTemplate
+    open var triggers: [Trigger]
     
-    public let config: MutableProperty<SyncerConfig>
+    open let config: MutableProperty<SyncerConfig>
     
-    public var configTriplet: ConfigTriplet {
+    open var configTriplet: ConfigTriplet {
         return ConfigTriplet(syncer: self.config.value, server: self.xcodeServer.config, project: self.project.config.value, buildTemplate: self.buildTemplate, triggers: self.triggers.map { $0.config })
     }
     
@@ -46,7 +46,7 @@ public class StandardSyncer : Syncer {
         self.active = false
     }
     
-    public override func sync(completion: () -> ()) {
+    open override func sync(_ completion: () -> ()) {
         
         if let repoName = self.repoName() {
             

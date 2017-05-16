@@ -21,7 +21,7 @@ class SyncPair_Branch_NoBot: SyncPair {
         super.init()
     }
     
-    override func sync(completion: Completion) {
+    override func sync(_ completion: Completion) {
         
         //create a bot for this branch
         let syncer = self.syncer
@@ -37,7 +37,7 @@ class SyncPair_Branch_NoBot: SyncPair {
     
     //MARK: Internal
     
-    private class func createBotForBranch(syncer syncer: StandardSyncer, branch: BranchType, repo: RepoType, completion: Completion) {
+    fileprivate class func createBotForBranch(syncer: StandardSyncer, branch: BranchType, repo: RepoType, completion: @escaping Completion) {
         
         syncer.createBotFromBranch(branch, repo: repo, completion: { () -> () in
             completion(error: nil)

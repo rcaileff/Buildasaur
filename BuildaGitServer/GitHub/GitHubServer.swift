@@ -28,63 +28,63 @@ class GitHubServer : GitServer {
 
 extension GitHubServer: SourceServerType {
     
-    func getBranchesOfRepo(repo: String, completion: (branches: [BranchType]?, error: ErrorType?) -> ()) {
+    func getBranchesOfRepo(_ repo: String, completion: @escaping (_ branches: [BranchType]?, _ error: Error?) -> ()) {
         
         self._getBranchesOfRepo(repo) { (branches, error) -> () in
-            completion(branches: branches?.map { $0 as BranchType }, error: error)
+            completion(branches?.map { $0 as BranchType }, error)
         }
     }
     
-    func getOpenPullRequests(repo: String, completion: (prs: [PullRequestType]?, error: ErrorType?) -> ()) {
+    func getOpenPullRequests(_ repo: String, completion: @escaping (_ prs: [PullRequestType]?, _ error: Error?) -> ()) {
         
         self._getOpenPullRequests(repo) { (prs, error) -> () in
-            completion(prs: prs?.map { $0 as PullRequestType }, error: error)
+            completion(prs?.map { $0 as PullRequestType }, error)
         }
     }
     
-    func getPullRequest(pullRequestNumber: Int, repo: String, completion: (pr: PullRequestType?, error: ErrorType?) -> ()) {
+    func getPullRequest(_ pullRequestNumber: Int, repo: String, completion: @escaping (_ pr: PullRequestType?, _ error: Error?) -> ()) {
         
         self._getPullRequest(pullRequestNumber, repo: repo) { (pr, error) -> () in
-            completion(pr: pr, error: error)
+            completion(pr, error)
         }
     }
     
-    func getRepo(repo: String, completion: (repo: RepoType?, error: ErrorType?) -> ()) {
+    func getRepo(_ repo: String, completion: @escaping (_ repo: RepoType?, _ error: Error?) -> ()) {
         
         self._getRepo(repo) { (repo, error) -> () in
-            completion(repo: repo, error: error)
+            completion(repo, error)
         }
     }
     
-    func getStatusOfCommit(commit: String, repo: String, completion: (status: StatusType?, error: ErrorType?) -> ()) {
+    func getStatusOfCommit(_ commit: String, repo: String, completion: @escaping (_ status: StatusType?, _ error: Error?) -> ()) {
         
         self._getStatusOfCommit(commit, repo: repo) { (status, error) -> () in
-            completion(status: status, error: error)
+            completion(status, error)
         }
     }
     
-    func postStatusOfCommit(commit: String, status: StatusType, repo: String, completion: (status: StatusType?, error: ErrorType?) -> ()) {
+    func postStatusOfCommit(_ commit: String, status: StatusType, repo: String, completion: @escaping (_ status: StatusType?, _ error: Error?) -> ()) {
         
         self._postStatusOfCommit(status as! GitHubStatus, sha: commit, repo: repo) { (status, error) -> () in
-            completion(status: status, error: error)
+            completion(status, error)
         }
     }
     
-    func postCommentOnIssue(comment: String, issueNumber: Int, repo: String, completion: (comment: CommentType?, error: ErrorType?) -> ()) {
+    func postCommentOnIssue(_ comment: String, issueNumber: Int, repo: String, completion: @escaping (_ comment: CommentType?, _ error: Error?) -> ()) {
         
         self._postCommentOnIssue(comment, issueNumber: issueNumber, repo: repo) { (comment, error) -> () in
-            completion(comment: comment, error: error)
+            completion(comment, error)
         }
     }
     
-    func getCommentsOfIssue(issueNumber: Int, repo: String, completion: (comments: [CommentType]?, error: ErrorType?) -> ()) {
+    func getCommentsOfIssue(_ issueNumber: Int, repo: String, completion: @escaping (_ comments: [CommentType]?, _ error: Error?) -> ()) {
         
         self._getCommentsOfIssue(issueNumber, repo: repo) { (comments, error) -> () in
-            completion(comments: comments?.map { $0 as CommentType }, error: error)
+            completion(comments?.map { $0 as CommentType }, error)
         }
     }
     
-    func createStatusFromState(buildState: BuildState, description: String?, targetUrl: String?) -> StatusType {
+    func createStatusFromState(_ buildState: BuildState, description: String?, targetUrl: String?) -> StatusType {
         
         let state = GitHubStatus.GitHubState.fromBuildState(buildState)
         let context = "Buildasaur"
@@ -94,7 +94,7 @@ extension GitHubServer: SourceServerType {
 
 extension GitHubServer {
     
-    private func _sendRequestWithPossiblePagination(request: NSMutableURLRequest, accumulatedResponseBody: NSArray, completion: HTTP.Completion) {
+    fileprivate func _sendRequestWithPossiblePagination(_ request: NSMutableURLRequest, accumulatedResponseBody: NSArray, completion: HTTP.Completion) {
         
         self._sendRequest(request) {
             (response, body, error) -> () in
@@ -140,38 +140,38 @@ extension GitHubServer {
         case Last = "last"
     }
     
-    private func _parsePageLinks(links: String) -> [RelPage: NSURL]? {
+    fileprivate func _parsePageLinks(_ links: String) -> [RelPage: URL]? {
         
-        var linkDict = [RelPage: NSURL]()
+        var linkDict = [RelPage: URL]()
         
-        for i in links.componentsSeparatedByString(",") {
+        for i in links.components(separatedBy: ",") {
             
-            let link = i.componentsSeparatedByString(";")
+            let link = i.components(separatedBy: ";")
             if link.count < 2 {
                 continue
             }
             
             //url
-            var urlString = link[0].stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
+            var urlString = link[0].trimmingCharacters(in: CharacterSet.whitespaces)
             if urlString.hasPrefix("<") && urlString.hasSuffix(">") {
-                urlString = urlString[urlString.startIndex.successor() ..< urlString.endIndex.predecessor()]
+                urlString = urlString[urlString.characters.index(after: urlString.startIndex) ..< urlString.characters.index(before: urlString.endIndex)]
             }
             
             //rel
             let relString = link[1]
-            let relComps = relString.componentsSeparatedByString("=")
+            let relComps = relString.components(separatedBy: "=")
             if relComps.count < 2 {
                 continue
             }
             
             var relName = relComps[1]
             if relName.hasPrefix("\"") && relName.hasSuffix("\"") {
-                relName = relName[relName.startIndex.successor() ..< relName.endIndex.predecessor()]
+                relName = relName[relName.characters.index(after: relName.startIndex) ..< relName.characters.index(before: relName.endIndex)]
             }
             
             if
                 let rel = RelPage(rawValue: relName),
-                let url = NSURL(string: urlString)
+                let url = URL(string: urlString)
             {
                 linkDict[rel] = url
             }
@@ -180,7 +180,7 @@ extension GitHubServer {
         return linkDict
     }
     
-    private func _sendRequest(request: NSMutableURLRequest, completion: HTTP.Completion) {
+    fileprivate func _sendRequest(_ request: NSMutableURLRequest, completion: HTTP.Completion) {
         
         let cachedInfo = self.cache.getCachedInfoForRequest(request)
         if let etag = cachedInfo.etag {
@@ -217,8 +217,7 @@ extension GitHubServer {
             
             if
                 let respDict = body as? NSDictionary,
-                let message = respDict["message"] as? String
-                where message == "Not Found" {
+                let message = respDict["message"] as? String, message == "Not Found" {
                     
                     let url = request.URL ?? ""
                     completion(response: nil, body: nil, error: Error.withInfo("Not found: \(url)"))
@@ -248,7 +247,7 @@ extension GitHubServer {
         })
     }
     
-    private func _sendRequestWithMethod(method: HTTP.Method, endpoint: GitHubEndpoints.Endpoint, params: [String: String]?, query: [String: String]?, body: NSDictionary?, completion: HTTP.Completion) {
+    fileprivate func _sendRequestWithMethod(_ method: HTTP.Method, endpoint: GitHubEndpoints.Endpoint, params: [String: String]?, query: [String: String]?, body: NSDictionary?, completion: HTTP.Completion) {
         
         var allParams = [
             "method": method.rawValue
@@ -272,7 +271,7 @@ extension GitHubServer {
     /**
     *   GET all open pull requests of a repo (full name).
     */
-    private func _getOpenPullRequests(repo: String, completion: (prs: [GitHubPullRequest]?, error: NSError?) -> ()) {
+    fileprivate func _getOpenPullRequests(_ repo: String, completion: @escaping (_ prs: [GitHubPullRequest]?, _ error: NSError?) -> ()) {
         
         let params = [
             "repo": repo
@@ -297,7 +296,7 @@ extension GitHubServer {
     /**
     *   GET a pull requests of a repo (full name) by its number.
     */
-    private func _getPullRequest(pullRequestNumber: Int, repo: String, completion: (pr: GitHubPullRequest?, error: NSError?) -> ()) {
+    fileprivate func _getPullRequest(_ pullRequestNumber: Int, repo: String, completion: @escaping (_ pr: GitHubPullRequest?, _ error: NSError?) -> ()) {
         
         let params = [
             "repo": repo,
@@ -325,7 +324,7 @@ extension GitHubServer {
     /**
     *   GET all open issues of a repo (full name).
     */
-    private func _getOpenIssues(repo: String, completion: (issues: [GitHubIssue]?, error: NSError?) -> ()) {
+    fileprivate func _getOpenIssues(_ repo: String, completion: @escaping (_ issues: [GitHubIssue]?, _ error: NSError?) -> ()) {
         
         let params = [
             "repo": repo
@@ -350,7 +349,7 @@ extension GitHubServer {
     /**
     *   GET an issue of a repo (full name) by its number.
     */
-    private func _getIssue(issueNumber: Int, repo: String, completion: (issue: GitHubIssue?, error: NSError?) -> ()) {
+    fileprivate func _getIssue(_ issueNumber: Int, repo: String, completion: @escaping (_ issue: GitHubIssue?, _ error: NSError?) -> ()) {
         
         let params = [
             "repo": repo,
@@ -378,7 +377,7 @@ extension GitHubServer {
     /**
     *   POST a new Issue
     */
-    private func _postNewIssue(issueTitle: String, issueBody: String?, repo: String, completion: (issue: GitHubIssue?, error: NSError?) -> ()) {
+    fileprivate func _postNewIssue(_ issueTitle: String, issueBody: String?, repo: String, completion: @escaping (_ issue: GitHubIssue?, _ error: NSError?) -> ()) {
         
         let params = [
             "repo": repo,
@@ -410,7 +409,7 @@ extension GitHubServer {
     /**
     *   Close an Issue by its number and repo (full name).
     */
-    private func _closeIssue(issueNumber: Int, repo: String, completion: (issue: GitHubIssue?, error: NSError?) -> ()) {
+    fileprivate func _closeIssue(_ issueNumber: Int, repo: String, completion: @escaping (_ issue: GitHubIssue?, _ error: NSError?) -> ()) {
         
         let params = [
             "repo": repo,
@@ -442,7 +441,7 @@ extension GitHubServer {
     /**
     *   GET the status of a commit (sha) from a repo.
     */
-    private func _getStatusOfCommit(sha: String, repo: String, completion: (status: GitHubStatus?, error: NSError?) -> ()) {
+    fileprivate func _getStatusOfCommit(_ sha: String, repo: String, completion: @escaping (_ status: GitHubStatus?, _ error: NSError?) -> ()) {
         
         let params = [
             "repo": repo,
@@ -472,7 +471,7 @@ extension GitHubServer {
     /**
     *   POST a new status on a commit.
     */
-    private func _postStatusOfCommit(status: GitHubStatus, sha: String, repo: String, completion: (status: GitHubStatus?, error: NSError?) -> ()) {
+    fileprivate func _postStatusOfCommit(_ status: GitHubStatus, sha: String, repo: String, completion: @escaping (_ status: GitHubStatus?, _ error: NSError?) -> ()) {
         
         let params = [
             "repo": repo,
@@ -503,7 +502,7 @@ extension GitHubServer {
     *   and general issue comments - which appear in both Issues and Pull Requests (bc a PR is an Issue + code)
     *   This API only fetches the general issue comments, NOT comments on code.
     */
-    private func _getCommentsOfIssue(issueNumber: Int, repo: String, completion: (comments: [GitHubComment]?, error: NSError?) -> ()) {
+    fileprivate func _getCommentsOfIssue(_ issueNumber: Int, repo: String, completion: @escaping (_ comments: [GitHubComment]?, _ error: NSError?) -> ()) {
         
         let params = [
             "repo": repo,
@@ -531,7 +530,7 @@ extension GitHubServer {
     /**
     *   POST a comment on an issue.
     */
-    private func _postCommentOnIssue(commentBody: String, issueNumber: Int, repo: String, completion: (comment: GitHubComment?, error: NSError?) -> ()) {
+    fileprivate func _postCommentOnIssue(_ commentBody: String, issueNumber: Int, repo: String, completion: @escaping (_ comment: GitHubComment?, _ error: NSError?) -> ()) {
         
         let params = [
             "repo": repo,
@@ -563,7 +562,7 @@ extension GitHubServer {
     /**
     *   PATCH edit a comment with id
     */
-    private func _editCommentOnIssue(commentId: Int, newCommentBody: String, repo: String, completion: (comment: GitHubComment?, error: NSError?) -> ()) {
+    fileprivate func _editCommentOnIssue(_ commentId: Int, newCommentBody: String, repo: String, completion: @escaping (_ comment: GitHubComment?, _ error: NSError?) -> ()) {
         
         let params = [
             "repo": repo,
@@ -596,7 +595,7 @@ extension GitHubServer {
     *   POST merge a head branch/commit into a base branch.
     *   has a couple of different responses, a bit tricky
     */
-    private func _mergeHeadIntoBase(head head: String, base: String, commitMessage: String, repo: String, completion: (result: GitHubEndpoints.MergeResult?, error: NSError?) -> ()) {
+    fileprivate func _mergeHeadIntoBase(head: String, base: String, commitMessage: String, repo: String, completion: @escaping (_ result: GitHubEndpoints.MergeResult?, _ error: NSError?) -> ()) {
         
         let params = [
             "repo": repo
@@ -647,7 +646,7 @@ extension GitHubServer {
     /**
     *   GET branches of a repo
     */
-    private func _getBranchesOfRepo(repo: String, completion: (branches: [GitHubBranch]?, error: NSError?) -> ()) {
+    fileprivate func _getBranchesOfRepo(_ repo: String, completion: @escaping (_ branches: [GitHubBranch]?, _ error: NSError?) -> ()) {
         
         let params = [
             "repo": repo
@@ -675,7 +674,7 @@ extension GitHubServer {
     /**
     *   GET repo metadata
     */
-    private func _getRepo(repo: String, completion: (repo: GitHubRepo?, error: NSError?) -> ()) {
+    fileprivate func _getRepo(_ repo: String, completion: @escaping (_ repo: GitHubRepo?, _ error: NSError?) -> ()) {
         
         let params = [
             "repo": repo

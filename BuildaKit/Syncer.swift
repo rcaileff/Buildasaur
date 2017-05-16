@@ -13,15 +13,15 @@ import ReactiveCocoa
 
 public enum SyncerEventType {
     
-    case Initial
+    case initial
     
-    case DidBecomeActive
-    case DidStop
+    case didBecomeActive
+    case didStop
     
-    case DidStartSyncing
-    case DidFinishSyncing(ErrorType?)
+    case didStartSyncing
+    case didFinishSyncing(Error?)
     
-    case DidEncounterError(ErrorType)
+    case didEncounterError(Error)
 }
 
 class Trampoline: NSObject {
@@ -30,41 +30,41 @@ class Trampoline: NSObject {
     func jump() { self.block?() }
 }
 
-@objc public class Syncer: NSObject {
+@objc open class Syncer: NSObject {
     
-    public let state = MutableProperty<SyncerEventType>(.Initial)
+    open let state = MutableProperty<SyncerEventType>(.Initial)
     
     //public
-    public internal(set) var reports: [String: String] = [:]
-    public private(set) var lastSuccessfulSyncFinishedDate: NSDate?
-    public private(set) var lastSyncFinishedDate: NSDate?
-    public private(set) var lastSyncStartDate: NSDate?
-    public private(set) var lastSyncError: NSError?
+    open internal(set) var reports: [String: String] = [:]
+    open fileprivate(set) var lastSuccessfulSyncFinishedDate: Date?
+    open fileprivate(set) var lastSyncFinishedDate: Date?
+    open fileprivate(set) var lastSyncStartDate: Date?
+    open fileprivate(set) var lastSyncError: NSError?
     
-    private var currentSyncError: NSError?
+    fileprivate var currentSyncError: NSError?
     
     /// How often, in seconds, the syncer should pull data from both sources and resolve pending actions
-    public var syncInterval: NSTimeInterval
+    open var syncInterval: TimeInterval
     
-    private var isSyncing: Bool {
+    fileprivate var isSyncing: Bool {
         didSet {
             if !oldValue && self.isSyncing {
-                self.lastSyncStartDate = NSDate()
+                self.lastSyncStartDate = Date()
                 self.state.value = .DidStartSyncing
             } else if oldValue && !self.isSyncing {
-                self.lastSyncFinishedDate = NSDate()
+                self.lastSyncFinishedDate = Date()
                 self.state.value = .DidFinishSyncing(self.lastSyncError)
             }
         }
     }
     
-    public var active: Bool {
+    open var active: Bool {
         didSet {
             if active && !oldValue {
                 let s = #selector(Trampoline.jump)
-                let timer = NSTimer(timeInterval: self.syncInterval, target: self.trampoline, selector: s, userInfo: nil, repeats: true)
+                let timer = Timer(timeInterval: self.syncInterval, target: self.trampoline, selector: s, userInfo: nil, repeats: true)
                 self.timer = timer
-                NSRunLoop.mainRunLoop().addTimer(timer, forMode: kCFRunLoopCommonModes as String)
+                RunLoop.main.add(timer, forMode: CFRunLoopMode.commonModes as String)
                 self._sync() //call for the first time, next one will be called by the timer
                 self.state.value = .DidBecomeActive
             } else if !active && oldValue {
@@ -79,15 +79,15 @@ class Trampoline: NSObject {
     //TODO: shouldn't be a mutableproperty, because nothing happens
     //when you actually set it (the syncer isn't affected). only using
     //for observing the active state from the outside world.
-    public let activeSignalProducer = MutableProperty<Bool>(false)
+    open let activeSignalProducer = MutableProperty<Bool>(false)
 
     //private
-    var timer: NSTimer?
-    private let trampoline: Trampoline
+    var timer: Timer?
+    fileprivate let trampoline: Trampoline
 
     //---------------------------------------------------------
     
-    public init(syncInterval: NSTimeInterval) {
+    public init(syncInterval: TimeInterval) {
         self.syncInterval = syncInterval
         self.active = false
         self.isSyncing = false
@@ -117,14 +117,14 @@ class Trampoline: NSObject {
         
         self.isSyncing = true
         self.currentSyncError = nil
-        self.reports.removeAll(keepCapacity: true)
+        self.reports.removeAll(keepingCapacity: true)
         
-        let start = NSDate()
+        let start = Date()
         Log.info("Sync starting at \(start)")
         
         self.sync { () -> () in
             
-            let end = NSDate()
+            let end = Date()
             let finishState: String
             if let error = self.currentSyncError {
                 finishState = "with error"
@@ -132,22 +132,22 @@ class Trampoline: NSObject {
             } else {
                 finishState = "successfully"
                 self.lastSyncError = nil
-                self.lastSuccessfulSyncFinishedDate = NSDate()
+                self.lastSuccessfulSyncFinishedDate = Date()
             }
             Log.info("Sync finished \(finishState) at \(end), took \(end.timeIntervalSinceDate(start).clipTo(3)) seconds.")
             self.isSyncing = false
         }
     }
     
-    func notifyErrorString(errorString: String, context: String?) {
+    func notifyErrorString(_ errorString: String, context: String?) {
         self.notifyError(Error.withInfo(errorString), context: context)
     }
     
-    func notifyError(error: ErrorType?, context: String?) {
+    func notifyError(_ error: Error?, context: String?) {
         self.notifyError(error as? NSError, context: context)
     }
     
-    func notifyError(error: NSError?, context: String?) {
+    func notifyError(_ error: NSError?, context: String?) {
         
         var message = "Syncing encountered a problem. "
         
@@ -165,7 +165,7 @@ class Trampoline: NSObject {
     /**
     To be overriden by subclasses to do their logic in
     */
-    public func sync(completion: () -> ()) {
+    open func sync(_ completion: () -> ()) {
         //sync logic here
         assertionFailure("Should be overriden by subclasses")
     }

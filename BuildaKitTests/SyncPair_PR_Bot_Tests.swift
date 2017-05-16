@@ -14,12 +14,12 @@ import XcodeServerSDK
 import BuildaKit
 
 //for tuples, XCTAssert... doesn't work for them
-func XCTBAssertNil<T>(@autoclosure expression:  () -> T?, message: String = "Must be nil",
+func XCTBAssertNil<T>(_ expression:  @autoclosure () -> T?, message: String = "Must be nil",
     file: StaticString = #file, line: UInt = #line) {
     XCTAssert(expression() == nil, message, file:file, line:line);
 }
 
-func XCTBAssertNotNil<T>(@autoclosure expression:  () -> T?, message: String = "Must not be nil",
+func XCTBAssertNotNil<T>(_ expression:  @autoclosure () -> T?, message: String = "Must not be nil",
     file: StaticString = #file, line: UInt = #line) {
         XCTAssert(expression() != nil, message, file:file, line:line);
 }

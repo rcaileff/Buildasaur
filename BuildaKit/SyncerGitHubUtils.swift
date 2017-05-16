@@ -12,7 +12,7 @@ import BuildaUtils
 
 extension StandardSyncer: BuildStatusCreator {
     
-    public func createStatusFromState(state: BuildState, description: String?, targetUrl: String?) -> StatusType {
+    public func createStatusFromState(_ state: BuildState, description: String?, targetUrl: String?) -> StatusType {
         
         return self._sourceServer.createStatusFromState(state, description: description, targetUrl: targetUrl)
     }
@@ -21,10 +21,10 @@ extension StandardSyncer: BuildStatusCreator {
 extension StandardSyncer {
     
     func updateCommitStatusIfNecessary(
-        newStatus: StatusAndComment,
+        _ newStatus: StatusAndComment,
         commit: String,
         issue: IssueType?,
-        completion: SyncPair.Completion) {
+        completion: @escaping SyncPair.Completion) {
         
         let repoName = self.repoName()!
         self._sourceServer.getStatusOfCommit(commit, repo: repoName, completion: { (status, error) -> () in
@@ -48,7 +48,7 @@ extension StandardSyncer {
         })
     }
 
-    func postStatusWithComment(statusWithComment: StatusAndComment, commit: String, repo: String, issue: IssueType?, completion: SyncPair.Completion) {
+    func postStatusWithComment(_ statusWithComment: StatusAndComment, commit: String, repo: String, issue: IssueType?, completion: @escaping SyncPair.Completion) {
         
         self._sourceServer.postStatusOfCommit(commit, status: statusWithComment.status, repo: repo) { (status, error) -> () in
             
@@ -64,7 +64,7 @@ extension StandardSyncer {
             //optional there can be a comment to be posted and there's an issue to be posted on
             if
                 let issue = issue,
-                let comment = statusWithComment.comment where postStatusComments {
+                let comment = statusWithComment.comment, postStatusComments {
                 
                 //we have a comment, post it
                 self._sourceServer.postCommentOnIssue(comment, issueNumber: issue.number, repo: repo, completion: { (comment, error) -> () in

@@ -28,7 +28,7 @@ class MockGitHubServer: GitHubServer {
 class MockProject: Project {
     init() {
         let path: String = #file
-        let folder = (path as NSString).stringByDeletingLastPathComponent
+        let folder = (path as NSString).deletingLastPathComponent
         let testProject = "\(folder)/TestProjects/Buildasaur-TestProject-iOS/Buildasaur-TestProject-iOS.xcworkspace"
         var config = ProjectConfig()
         config.url = testProject
@@ -66,7 +66,7 @@ class MockRepo: GitHubRepo {
 
 class MockBranch: GitHubBranch {
     
-    class func mockDictionary(name: String = "master", sha: String = "1234f") -> NSDictionary {
+    class func mockDictionary(_ name: String = "master", sha: String = "1234f") -> NSDictionary {
         return [
             "name": name,
             "commit": [
@@ -86,7 +86,7 @@ class MockBranch: GitHubBranch {
 
 class MockPullRequestBranch: GitHubPullRequestBranch {
     
-    class func mockDictionary(ref: String = "mock_ref", sha: String = "1234f") -> NSDictionary {
+    class func mockDictionary(_ ref: String = "mock_ref", sha: String = "1234f") -> NSDictionary {
         return [
             "ref": ref,
             "sha": sha,
@@ -105,7 +105,7 @@ class MockPullRequestBranch: GitHubPullRequestBranch {
 
 class MockIssue: GitHubIssue {
     
-    class func mockDictionary(number: Int = 1, body: String = "body", title: String = "title") -> NSDictionary {
+    class func mockDictionary(_ number: Int = 1, body: String = "body", title: String = "title") -> NSDictionary {
         return [
             "number": number,
             "body": body,
@@ -123,7 +123,7 @@ class MockIssue: GitHubIssue {
 }
 
 class MockBuildStatusCreator: BuildStatusCreator {
-    func createStatusFromState(state: BuildState, description: String?, targetUrl: String?) -> StatusType {
+    func createStatusFromState(_ state: BuildState, description: String?, targetUrl: String?) -> StatusType {
         return GitHubStatus(state: GitHubStatus.GitHubState.fromBuildState(state), description: "Things happened", targetUrl: "http://hello.world", context: "Buildasaur")
     }
     
@@ -132,14 +132,14 @@ class MockBuildStatusCreator: BuildStatusCreator {
 
 class MockPullRequest: GitHubPullRequest {
     
-    class func mockDictionary(number: Int, title: String, head: NSDictionary, base: NSDictionary) -> NSDictionary {
+    class func mockDictionary(_ number: Int, title: String, head: NSDictionary, base: NSDictionary) -> NSDictionary {
         let dict = MockIssue.mockDictionary(number, body: "body", title: title).mutableCopy() as! NSMutableDictionary
         dict["head"] = head
         dict["base"] = base
         return dict.copy() as! NSDictionary
     }
     
-    class func mockDictionary(number: Int, title: String) -> NSDictionary {
+    class func mockDictionary(_ number: Int, title: String) -> NSDictionary {
         
         let head = MockPullRequestBranch.mockDictionary("head", sha: "head_sha")
         let base = MockPullRequestBranch.mockDictionary("base", sha: "base_sha")

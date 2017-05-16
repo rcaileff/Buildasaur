@@ -14,8 +14,8 @@ import ReactiveCocoa
 import Result
 
 protocol TriggerViewControllerDelegate: class {
-    func triggerViewControllerDidCancelEditingTrigger(trigger: TriggerConfig)
-    func triggerViewControllerDidSaveTrigger(trigger: TriggerConfig)
+    func triggerViewControllerDidCancelEditingTrigger(_ trigger: TriggerConfig)
+    func triggerViewControllerDidSaveTrigger(_ trigger: TriggerConfig)
 }
 
 class TriggerViewController: NSViewController {
@@ -49,15 +49,15 @@ class TriggerViewController: NSViewController {
     @IBOutlet weak var emailIncludeIssueDetailsCheckbox: NSButton!
     
     //state
-    private let phases = MutableProperty<[TriggerConfig.Phase]>(TriggerViewController.allPhases())
-    private let kinds = MutableProperty<[TriggerConfig.Kind]>([])
+    fileprivate let phases = MutableProperty<[TriggerConfig.Phase]>(TriggerViewController.allPhases())
+    fileprivate let kinds = MutableProperty<[TriggerConfig.Kind]>([])
     
-    private let selectedKind = MutableProperty<TriggerConfig.Kind>(.RunScript)
-    private let selectedPhase = MutableProperty<TriggerConfig.Phase>(.Prebuild)
-    private let emailConfiguration = MutableProperty<EmailConfiguration?>(nil)
-    private let conditions = MutableProperty<TriggerConditions?>(nil)
-    private let isValid = MutableProperty<Bool>(false)
-    private let generatedTrigger = MutableProperty<TriggerConfig?>(nil)
+    fileprivate let selectedKind = MutableProperty<TriggerConfig.Kind>(.RunScript)
+    fileprivate let selectedPhase = MutableProperty<TriggerConfig.Phase>(.Prebuild)
+    fileprivate let emailConfiguration = MutableProperty<EmailConfiguration?>(nil)
+    fileprivate let conditions = MutableProperty<TriggerConditions?>(nil)
+    fileprivate let isValid = MutableProperty<Bool>(false)
+    fileprivate let generatedTrigger = MutableProperty<TriggerConfig?>(nil)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -122,7 +122,7 @@ class TriggerViewController: NSViewController {
     
     //MARK: RAC setup
     
-    private func setupKinds() {
+    fileprivate func setupKinds() {
         
         //bind the available kinds for a selected phase
         let availableKinds = self.selectedPhase.producer.map { TriggerViewController.allKinds($0) }
@@ -166,7 +166,7 @@ class TriggerViewController: NSViewController {
         self.kindPopup.rac_command = toRACCommand(action)
     }
     
-    private func setupPhases() {
+    fileprivate func setupPhases() {
         
         //data source
         let producer = self.phases.producer
@@ -192,7 +192,7 @@ class TriggerViewController: NSViewController {
         self.phasePopup.rac_command = toRACCommand(action)
     }
     
-    private func setupConditions() {
+    fileprivate func setupConditions() {
         
         let success = self.conditionSuccessCheckbox.rac_on
         let warnings = self.conditionWarningsCheckbox.rac_on
@@ -223,7 +223,7 @@ class TriggerViewController: NSViewController {
         self.conditions <~ conditionsOrNil
     }
     
-    private func setupEmailConfiguration() {
+    fileprivate func setupEmailConfiguration() {
         
         let includeCommitters = self.emailEmailCommittersCheckbox.rac_on
         let includeCommits = self.emailIncludeCommitsCheckbox.rac_on
@@ -258,7 +258,7 @@ class TriggerViewController: NSViewController {
         self.emailConfiguration <~ configOrNil
     }
     
-    private func setupGeneratedTrigger() {
+    fileprivate func setupGeneratedTrigger() {
         
         let name = self.nameTextField.rac_text.skipRepeats()
         let kind = self.selectedKind.producer
@@ -301,7 +301,7 @@ class TriggerViewController: NSViewController {
         self.generatedTrigger <~ generated.map { Optional($0) }
     }
     
-    private func setupLabels() {
+    fileprivate func setupLabels() {
         
         let bodyLabel = self.selectedKind.producer.map { kind -> String in
             if kind == .RunScript {
@@ -316,7 +316,7 @@ class TriggerViewController: NSViewController {
     
     //MARK: actions
     
-    @IBAction func saveButtonClicked(sender: NSButton) {
+    @IBAction func saveButtonClicked(_ sender: NSButton) {
         
         let currentTrigger = self.generatedTrigger.value!
         
@@ -327,16 +327,16 @@ class TriggerViewController: NSViewController {
         self.delegate?.triggerViewControllerDidSaveTrigger(currentTrigger)
         
         //dismiss
-        self.dismissController(nil)
+        self.dismiss(nil)
     }
     
-    @IBAction func cancelButtonClicked(sender: NSButton) {
+    @IBAction func cancelButtonClicked(_ sender: NSButton) {
         
         //in case of cancel we could never have had a valid trigger, so just
         //use the original trigger in that case. we only care about the id anyway.
         let currentTrigger = self.generatedTrigger.value ?? self.triggerConfig.value!
         self.delegate?.triggerViewControllerDidCancelEditingTrigger(currentTrigger)
-        self.dismissController(nil)
+        self.dismiss(nil)
     }
     
     //MARK: consts
@@ -348,7 +348,7 @@ class TriggerViewController: NSViewController {
         ]
     }
     
-    static func allKinds(phase: TriggerConfig.Phase) -> [TriggerConfig.Kind] {
+    static func allKinds(_ phase: TriggerConfig.Phase) -> [TriggerConfig.Kind] {
         
         var kinds = [TriggerConfig.Kind.RunScript]
         if phase == .Postbuild {
@@ -361,7 +361,7 @@ class TriggerViewController: NSViewController {
 extension TriggerViewController: NSTextFieldDelegate {
     
     //Taken from https://developer.apple.com/library/mac/qa/qa1454/_index.html
-    func control(control: NSControl, textView: NSTextView, doCommandBySelector commandSelector: Selector) -> Bool {
+    func control(_ control: NSControl, textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
         
         let result: Bool
         switch commandSelector {

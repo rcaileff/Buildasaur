@@ -37,7 +37,7 @@ class GitHubEntity : GitHubType {
         return NSDictionary()
     }
     
-    class func optional<T: GitHubEntity>(json: NSDictionary?) throws -> T? {
+    class func optional<T: GitHubEntity>(_ json: NSDictionary?) throws -> T? {
         if let json = json {
             return try T(json: json)
         }
@@ -47,7 +47,7 @@ class GitHubEntity : GitHubType {
 }
 
 //parse an array of dictionaries into an array of parsed entities
-func GitHubArray<T where T: GitHubType>(jsonArray: NSArray!) throws -> [T] {
+func GitHubArray<T>(_ jsonArray: NSArray!) throws -> [T] where T: GitHubType {
     
     let array = jsonArray as! [NSDictionary]
     let parsed = try array.map {

@@ -15,7 +15,7 @@ import ReactiveCocoa
 
 protocol BranchWatchingViewControllerDelegate: class {
     
-    func didUpdateWatchedBranches(branches: [String])
+    func didUpdateWatchedBranches(_ branches: [String])
 }
 
 private struct ShowableBranch {
@@ -30,7 +30,7 @@ class BranchWatchingViewController: NSViewController, NSTableViewDelegate, NSTab
     var watchedBranchNames: Set<String>!
     weak var delegate: BranchWatchingViewControllerDelegate?
     
-    private var branches: [ShowableBranch] = []
+    fileprivate var branches: [ShowableBranch] = []
     
     @IBOutlet weak var branchActivityIndicator: NSProgressIndicator!
     @IBOutlet weak var branchesTableView: NSTableView!
@@ -41,7 +41,7 @@ class BranchWatchingViewController: NSViewController, NSTableViewDelegate, NSTab
         assert(self.syncer != nil, "Syncer has not been set")
         self.watchedBranchNames = Set(self.syncer.config.value.watchedBranchNames)
         
-        self.branchesTableView.columnAutoresizingStyle = .UniformColumnAutoresizingStyle
+        self.branchesTableView.columnAutoresizingStyle = .uniformColumnAutoresizingStyle
     }
     
     override func viewWillAppear() {
@@ -113,19 +113,19 @@ class BranchWatchingViewController: NSViewController, NSTableViewDelegate, NSTab
         }.observeOn(UIScheduler())
     }
     
-    @IBAction func cancelTapped(sender: AnyObject) {
-        self.dismissController(nil)
+    @IBAction func cancelTapped(_ sender: AnyObject) {
+        self.dismiss(nil)
     }
     
-    @IBAction func doneTapped(sender: AnyObject) {
+    @IBAction func doneTapped(_ sender: AnyObject) {
         let updated = Array(self.watchedBranchNames)
         self.delegate?.didUpdateWatchedBranches(updated)
-        self.dismissController(nil)
+        self.dismiss(nil)
     }
     
     //MARK: branches table view
     
-    func numberOfRowsInTableView(tableView: NSTableView) -> Int {
+    func numberOfRows(in tableView: NSTableView) -> Int {
         
         if tableView == self.branchesTableView {
             return self.branches.count
@@ -133,8 +133,8 @@ class BranchWatchingViewController: NSViewController, NSTableViewDelegate, NSTab
         return 0
     }
     
-    func getTypeOfReusableView<T: NSView>(column: String) -> T {
-        guard let view = self.branchesTableView.makeViewWithIdentifier(column, owner: self) else {
+    func getTypeOfReusableView<T: NSView>(_ column: String) -> T {
+        guard let view = self.branchesTableView.make(withIdentifier: column, owner: self) else {
             fatalError("Couldn't get a reusable view for column \(column)")
         }
         guard let typedView = view as? T else {
@@ -143,7 +143,7 @@ class BranchWatchingViewController: NSViewController, NSTableViewDelegate, NSTab
         return typedView
     }
     
-    func tableView(tableView: NSTableView, viewForTableColumn tableColumn: NSTableColumn?, row: Int) -> NSView? {
+    func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
         
         guard let tcolumn = tableColumn else { return nil }
         let columnIdentifier = tcolumn.identifier
@@ -164,10 +164,10 @@ class BranchWatchingViewController: NSViewController, NSTableViewDelegate, NSTab
             let checkbox: BuildaNSButton = self.getTypeOfReusableView(columnIdentifier)
             if let _ = branch.pr {
                 checkbox.on = true
-                checkbox.enabled = false
+                checkbox.isEnabled = false
             } else {
                 checkbox.on = self.watchedBranchNames.contains(branch.name)
-                checkbox.enabled = true
+                checkbox.isEnabled = true
             }
             checkbox.row = row
             return checkbox
@@ -176,7 +176,7 @@ class BranchWatchingViewController: NSViewController, NSTableViewDelegate, NSTab
         }
     }
     
-    @IBAction func branchesTableViewRowCheckboxTapped(sender: BuildaNSButton) {
+    @IBAction func branchesTableViewRowCheckboxTapped(_ sender: BuildaNSButton) {
         
         //toggle selection in model
         let branch = self.branches[sender.row!]

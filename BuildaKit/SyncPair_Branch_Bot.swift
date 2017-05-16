@@ -11,7 +11,7 @@ import XcodeServerSDK
 import BuildaGitServer
 import BuildaUtils
 
-public class SyncPair_Branch_Bot: SyncPair {
+open class SyncPair_Branch_Bot: SyncPair {
     
     let branch: BranchType
     let bot: Bot
@@ -24,7 +24,7 @@ public class SyncPair_Branch_Bot: SyncPair {
         super.init()
     }
     
-    override func sync(completion: Completion) {
+    override func sync(_ completion: @escaping Completion) {
         
         //sync the branch with the bot
         self.syncBranchWithBot(completion)
@@ -36,7 +36,7 @@ public class SyncPair_Branch_Bot: SyncPair {
     
     //MARK: Internal
     
-    private func syncBranchWithBot(completion: Completion) {
+    fileprivate func syncBranchWithBot(_ completion: @escaping Completion) {
         
         let bot = self.bot
         let headCommit = self.branch.commitSHA

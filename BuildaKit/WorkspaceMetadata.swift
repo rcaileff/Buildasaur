@@ -23,31 +23,31 @@ public struct WorkspaceMetadata {
     public let projectPath: String
     public let projectWCCIdentifier: String
     public let projectWCCName: String
-    public let projectURL: NSURL
+    public let projectURL: URL
     public let service: GitService
     public let checkoutType: CheckoutType
     
     init(projectName: String?, projectPath: String?, projectWCCIdentifier: String?, projectWCCName: String?, projectURLString: String?) throws {
         
-        let errorForMissingKey: (String) -> ErrorType = { Error.withInfo("Can't find/parse \"\($0)\" in workspace metadata!") }
+        let errorForMissingKey: (String) -> Error = { Error.withInfo("Can't find/parse \"\($0)\" in workspace metadata!") }
         guard let projectName = projectName else { throw errorForMissingKey("Project Name") }
         guard let projectPath = projectPath else { throw errorForMissingKey("Project Path") }
         guard let projectWCCIdentifier = projectWCCIdentifier else { throw errorForMissingKey("Project WCC Identifier") }
         guard let projectWCCName = projectWCCName else { throw errorForMissingKey("Project WCC Name") }
         guard let projectURLString = projectURLString else { throw errorForMissingKey("Project URL") }
         guard let (checkoutType, service) = WorkspaceMetadata.parse(projectURLString) else {
-            let allowedString = [CheckoutType.SSH].map({ $0.rawValue }).joinWithSeparator(", ")
+            let allowedString = [CheckoutType.SSH].map({ $0.rawValue }).joined(separator: ", ")
             let error = Error.withInfo("Disallowed checkout type, the project must be checked out over one of the supported schemes: \(allowedString)")
             throw error
         }
         
         //we have to prefix SSH urls with "git@" (for a reason I don't remember anymore, probs because the user "git" is treated as a standard part of the url itself)
         var correctedProjectUrlString = projectURLString
-        if case .SSH = checkoutType where !projectURLString.hasPrefix("git@") {
+        if case .SSH = checkoutType, !projectURLString.hasPrefix("git@") {
             correctedProjectUrlString = "git@" + projectURLString
         }
         
-        guard let projectURL = NSURL(string: correctedProjectUrlString) else { throw Error.withInfo("Can't parse url \"\(projectURLString)\"") }
+        guard let projectURL = URL(string: correctedProjectUrlString) else { throw Error.withInfo("Can't parse url \"\(projectURLString)\"") }
         
         self.projectName = projectName
         self.projectPath = projectPath
@@ -58,15 +58,15 @@ public struct WorkspaceMetadata {
         self.service = service
     }
     
-    func duplicateWithForkURL(forkUrlString: String?) throws -> WorkspaceMetadata {
+    func duplicateWithForkURL(_ forkUrlString: String?) throws -> WorkspaceMetadata {
         return try WorkspaceMetadata(projectName: self.projectName, projectPath: self.projectPath, projectWCCIdentifier: self.projectWCCIdentifier, projectWCCName: self.projectWCCName, projectURLString: forkUrlString)
     }
 }
 
 extension WorkspaceMetadata {
 
-    internal static func parse(projectURLString: String) -> (CheckoutType, GitService)? {
-        guard let url = NSURL(string: projectURLString) else {
+    internal static func parse(_ projectURLString: String) -> (CheckoutType, GitService)? {
+        guard let url = URL(string: projectURLString) else {
             Log.error("Failed to convert urlString '\(projectURLString)' to an NSURL.")
             return nil
         }
@@ -90,7 +90,7 @@ extension WorkspaceMetadata {
         switch scheme {
         case "":
             // No scheme, likely to be SSH so let's check for the telltale 'git@' in the resource specifier.
-            if url.resourceSpecifier!.containsString("git@") {
+            if url.resourceSpecifier.containsString("git@") {
                 checkoutType = .SSH
             }
         case "ssh":
@@ -101,7 +101,7 @@ extension WorkspaceMetadata {
             Log.error("The \(scheme) scheme is not yet supported.")
         }
 
-        if let checkoutType = checkoutType, gitService = gitService {
+        if let checkoutType = checkoutType, let gitService = gitService {
             return (checkoutType, gitService)
         }
 

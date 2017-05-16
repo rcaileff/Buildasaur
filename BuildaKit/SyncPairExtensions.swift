@@ -19,16 +19,16 @@ extension SyncPair {
         public let startNewIntegrationBot: Bot? //if non-nil, starts a new integration on this bot
     }
 
-    func performActions(actions: Actions, completion: Completion) {
+    func performActions(_ actions: Actions, completion: @escaping Completion) {
         
-        let group = dispatch_group_create()
+        let group = DispatchGroup()
         var lastGroupError: NSError?
         
         if let integrationsToCancel = actions.integrationsToCancel {
             
-            dispatch_group_enter(group)
+            group.enter()
             self.syncer.cancelIntegrations(integrationsToCancel, completion: { () -> () in
-                dispatch_group_leave(group)
+                group.leave()
             })
         }
         
@@ -38,7 +38,7 @@ extension SyncPair {
             let commit = newStatus.commit
             let issue = newStatus.issue
             
-            dispatch_group_enter(group)
+            group.enter()
             self.syncer.updateCommitStatusIfNecessary(status, commit: commit, issue: issue, completion: { (error) -> () in
                 if let error = error {
                     lastGroupError = error
@@ -51,10 +51,10 @@ extension SyncPair {
             
             let bot = startNewIntegrationBot
             
-            dispatch_group_enter(group)
+            group.enter()
             self.syncer._xcodeServer.postIntegration(bot.id, completion: { (integration, error) -> () in
                 
-                if let integration = integration where error == nil {
+                if let integration = integration, error == nil {
                     Log.info("Bot \(bot.name) successfully enqueued Integration #\(integration.number)")
                 } else {
                     let e = Error.withInfo("Bot \(bot.name) failed to enqueue an integration", internalError: error)
@@ -65,14 +65,14 @@ extension SyncPair {
             })
         }
         
-        dispatch_group_notify(group, dispatch_get_main_queue(), {
-            completion(error: lastGroupError)
+        group.notify(queue: DispatchQueue.main, execute: {
+            completion(lastGroupError)
         })
     }
     
     //MARK: Utility functions
     
-    func getIntegrations(bot: Bot, completion: (integrations: [Integration], error: NSError?) -> ()) {
+    func getIntegrations(_ bot: Bot, completion: (_ integrations: [Integration], _ error: NSError?) -> ()) {
         
         let syncer = self.syncer
         

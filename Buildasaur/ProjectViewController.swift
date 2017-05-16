@@ -15,8 +15,8 @@ import BuildaGitServer
 import ReactiveCocoa
 
 protocol ProjectViewControllerDelegate: class {
-    func didCancelEditingOfProjectConfig(config: ProjectConfig)
-    func didSaveProjectConfig(config: ProjectConfig)
+    func didCancelEditingOfProjectConfig(_ config: ProjectConfig)
+    func didSaveProjectConfig(_ config: ProjectConfig)
 }
 
 class ProjectViewController: ConfigEditViewController {
@@ -26,13 +26,13 @@ class ProjectViewController: ConfigEditViewController {
     
     var serviceAuthenticator: ServiceAuthenticator!
     
-    private var project: Project!
+    fileprivate var project: Project!
     
-    private let privateKeyUrl = MutableProperty<NSURL?>(nil)
-    private let publicKeyUrl = MutableProperty<NSURL?>(nil)
+    fileprivate let privateKeyUrl = MutableProperty<URL?>(nil)
+    fileprivate let publicKeyUrl = MutableProperty<URL?>(nil)
     
-    private let authenticator = MutableProperty<ProjectAuthenticator?>(nil)
-    private let userWantsTokenAuth = MutableProperty<Bool>(false)
+    fileprivate let authenticator = MutableProperty<ProjectAuthenticator?>(nil)
+    fileprivate let userWantsTokenAuth = MutableProperty<Bool>(false)
 
     //we have a project
     @IBOutlet weak var projectNameLabel: NSTextField!
@@ -155,7 +155,7 @@ class ProjectViewController: ConfigEditViewController {
         self.trashButton.rac_enabled <~ editing
     }
     
-    func updateServiceMeta(proj: Project, auth: ProjectAuthenticator?, userWantsTokenAuth: Bool) {
+    func updateServiceMeta(_ proj: Project, auth: ProjectAuthenticator?, userWantsTokenAuth: Bool) {
         
         let meta = proj.workspaceMetadata!
         let service = meta.service
@@ -170,7 +170,7 @@ class ProjectViewController: ConfigEditViewController {
 
         switch service {
         case .GitHub:
-            if let auth = auth where auth.type == .PersonalToken && !auth.secret.isEmpty {
+            if let auth = auth, auth.type == .PersonalToken && !auth.secret.isEmpty {
                 self.tokenTextField.stringValue = auth.secret
             } else {
                 self.tokenTextField.stringValue = ""
@@ -184,16 +184,16 @@ class ProjectViewController: ConfigEditViewController {
                 self.tokenTextField.stringValue = ""
             }
             self.useTokenButton.hidden = alreadyHasAuth
-            self.loginButton.hidden = true
-            self.logoutButton.hidden = true
+            self.loginButton.isHidden = true
+            self.logoutButton.isHidden = true
             showTokenField = true
         case .BitBucket:
-            self.useTokenButton.hidden = true
+            self.useTokenButton.isHidden = true
             self.loginButton.hidden = alreadyHasAuth
             self.logoutButton.hidden = !alreadyHasAuth
         }
         
-        self.tokenStackView.hidden = !showTokenField
+        self.tokenStackView.isHidden = !showTokenField
     }
     
     override func shouldGoNext() -> Bool {
@@ -223,7 +223,7 @@ class ProjectViewController: ConfigEditViewController {
         self.goBack()
     }
     
-    private func goBack() {
+    fileprivate func goBack() {
         let config = self.projectConfig.value
         self.delegate?.didCancelEditingOfProjectConfig(config)
     }
@@ -239,7 +239,7 @@ class ProjectViewController: ConfigEditViewController {
         })
     }
     
-    override func checkAvailability(statusChanged: ((status: AvailabilityCheckState) -> ())) {
+    override func checkAvailability(_ statusChanged: ((_ status: AvailabilityCheckState) -> ())) {
         
         AvailabilityChecker
             .projectAvailability()
@@ -284,11 +284,11 @@ class ProjectViewController: ConfigEditViewController {
         self.goBack()
     }
     
-    func selectKey(type: String) {
+    func selectKey(_ type: String) {
         
         if let url = StorageUtils.openSSHKey(type) {
             do {
-                _ = try NSString(contentsOfURL: url, encoding: NSASCIIStringEncoding)
+                _ = try NSString(contentsOfURL: url, encoding: String.Encoding.ascii)
                 if type == "public" {
                     self.publicKeyUrl.value = url
                 } else {
@@ -300,15 +300,15 @@ class ProjectViewController: ConfigEditViewController {
         }
     }
     
-    @IBAction func selectPublicKeyTapped(sender: AnyObject) {
+    @IBAction func selectPublicKeyTapped(_ sender: AnyObject) {
         self.selectKey("public")
     }
     
-    @IBAction func selectPrivateKeyTapped(sender: AnyObject) {
+    @IBAction func selectPrivateKeyTapped(_ sender: AnyObject) {
         self.selectKey("private")
     }
     
-    @IBAction func loginButtonClicked(sender: AnyObject) {
+    @IBAction func loginButtonClicked(_ sender: AnyObject) {
         
         self.userWantsTokenAuth.value = false
         
@@ -327,12 +327,12 @@ class ProjectViewController: ConfigEditViewController {
         }
     }
     
-    @IBAction func useTokenClicked(sender: AnyObject) {
+    @IBAction func useTokenClicked(_ sender: AnyObject) {
         
         self.userWantsTokenAuth.value = true
     }
     
-    @IBAction func logoutButtonClicked(sender: AnyObject) {
+    @IBAction func logoutButtonClicked(_ sender: AnyObject) {
         
         self.authenticator.value = nil
         self.userWantsTokenAuth.value = false

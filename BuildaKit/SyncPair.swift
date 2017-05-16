@@ -16,7 +16,7 @@ import XcodeServerSDK
 *   a PR + Bot figures out what to do next, ...)
 *   this is simpler than trying to catch all cases in one giant syncer class (at least I think)
 */
-public class SyncPair {
+open class SyncPair {
     
     var syncer: StandardSyncer!
     
@@ -24,28 +24,28 @@ public class SyncPair {
         //
     }
     
-    typealias Completion = (error: NSError?) -> ()
+    typealias Completion = (_ error: NSError?) -> ()
     
     /**
     *   Call to perform sync.
     */
-    final func start(completion: Completion) {
+    final func start(_ completion: Completion) {
         
-        let start = NSDate()
+        let start = Date()
 //        Log.verbose("SyncPair \(self.syncPairName()) started sync")
         
         self.sync { (error) -> () in
             
             let duration = -1 * start.timeIntervalSinceNow.clipTo(3)
             Log.verbose("SyncPair \(self.syncPairName()) finished sync after \(duration) seconds.")
-            completion(error: error)
+            completion(error)
         }
     }
     
     /**
     *   To be overriden by subclasses.
     */
-    func sync(completion: Completion) {
+    func sync(_ completion: Completion) {
         assertionFailure("Must be overriden by subclasses")
     }
     

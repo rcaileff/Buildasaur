@@ -9,13 +9,13 @@
 import Foundation
 import BuildaUtils
 
-public class Logging {
+open class Logging {
     
-    public class func setup(persistence: Persistence, alsoIntoFile: Bool) {
+    open class func setup(_ persistence: Persistence, alsoIntoFile: Bool) {
         
         let path = persistence
-            .fileURLWithName("Logs", intention: .Writing, isDirectory: true)
-            .URLByAppendingPathComponent("Builda.log", isDirectory: false)
+            .fileURLWithName("Logs", intention: .writing, isDirectory: true)
+            .appendingPathComponent("Builda.log", isDirectory: false)
         
         var loggers = [Logger]()
         
@@ -29,7 +29,7 @@ public class Logging {
         }
         
         Log.addLoggers(loggers)
-        let version = NSBundle.mainBundle().infoDictionary!["CFBundleShortVersionString"] as! String
+        let version = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
         let ascii =
         " ____        _ _     _\n" +
             "|  _ \\      (_) |   | |\n" +
@@ -38,6 +38,6 @@ public class Logging {
             "| |_) | |_| | | | (_| | (_| \\__ \\ (_| | |_| | |\n" +
         "|____/ \\__,_|_|_|\\__,_|\\__,_|___/\\__,_|\\__,_|_|\n"
         
-        Log.untouched("*\n*\n*\n\(ascii)\nBuildasaur \(version) launched at \(NSDate()).\n*\n*\n*\n")
+        Log.untouched("*\n*\n*\n\(ascii)\nBuildasaur \(version) launched at \(Date()).\n*\n*\n*\n")
     }
 }

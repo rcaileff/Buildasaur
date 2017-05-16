@@ -11,30 +11,30 @@ import XcodeServerSDK
 import BuildaGitServer
 
 public protocol SyncerFactoryType {
-    func createSyncers(configs: [ConfigTriplet]) -> [StandardSyncer]
+    func createSyncers(_ configs: [ConfigTriplet]) -> [StandardSyncer]
     func defaultConfigTriplet() -> ConfigTriplet
     func newEditableTriplet() -> EditableConfigTriplet
-    func createXcodeServer(config: XcodeServerConfig) -> XcodeServer
-    func createProject(config: ProjectConfig) -> Project?
-    func createSourceServer(service: GitService, auth: ProjectAuthenticator?) -> SourceServerType
-    func createTrigger(config: TriggerConfig) -> Trigger
+    func createXcodeServer(_ config: XcodeServerConfig) -> XcodeServer
+    func createProject(_ config: ProjectConfig) -> Project?
+    func createSourceServer(_ service: GitService, auth: ProjectAuthenticator?) -> SourceServerType
+    func createTrigger(_ config: TriggerConfig) -> Trigger
 }
 
 public protocol SyncerLifetimeChangeObserver {
-    func authChanged(projectConfigId: String, auth: ProjectAuthenticator)
+    func authChanged(_ projectConfigId: String, auth: ProjectAuthenticator)
 }
 
-public class SyncerFactory: SyncerFactoryType {
+open class SyncerFactory: SyncerFactoryType {
     
-    private var syncerPool = [RefType: StandardSyncer]()
-    private var projectPool = [RefType: Project]()
-    private var xcodeServerPool = [RefType: XcodeServer]()
+    fileprivate var syncerPool = [RefType: StandardSyncer]()
+    fileprivate var projectPool = [RefType: Project]()
+    fileprivate var xcodeServerPool = [RefType: XcodeServer]()
     
-    public var syncerLifetimeChangeObserver: SyncerLifetimeChangeObserver!
+    open var syncerLifetimeChangeObserver: SyncerLifetimeChangeObserver!
     
     public init() { }
     
-    private func createSyncer(triplet: ConfigTriplet) -> StandardSyncer? {
+    fileprivate func createSyncer(_ triplet: ConfigTriplet) -> StandardSyncer? {
         
         precondition(self.syncerLifetimeChangeObserver != nil)
         
@@ -82,7 +82,7 @@ public class SyncerFactory: SyncerFactoryType {
         return syncer
     }
     
-    public func createSyncers(configs: [ConfigTriplet]) -> [StandardSyncer] {
+    open func createSyncers(_ configs: [ConfigTriplet]) -> [StandardSyncer] {
         
         //create syncers
         let created = configs.map { self.createSyncer($0) }.filter { $0 != nil }.map { $0! }
@@ -99,16 +99,16 @@ public class SyncerFactory: SyncerFactoryType {
         return created
     }
     
-    public func defaultConfigTriplet() -> ConfigTriplet {
+    open func defaultConfigTriplet() -> ConfigTriplet {
         return ConfigTriplet(syncer: SyncerConfig(), server: XcodeServerConfig(), project: ProjectConfig(), buildTemplate: BuildTemplate(), triggers: [])
     }
     
-    public func newEditableTriplet() -> EditableConfigTriplet {
+    open func newEditableTriplet() -> EditableConfigTriplet {
         return EditableConfigTriplet(syncer: SyncerConfig(), server: nil, project: nil, buildTemplate: nil, triggers: nil)
     }
     
     //sort of private
-    public func createXcodeServer(config: XcodeServerConfig) -> XcodeServer {
+    open func createXcodeServer(_ config: XcodeServerConfig) -> XcodeServer {
         
         if let poolAttempt = self.xcodeServerPool[config.id] {
             poolAttempt.config = config
@@ -121,7 +121,7 @@ public class SyncerFactory: SyncerFactoryType {
         return server
     }
     
-    public func createProject(config: ProjectConfig) -> Project? {
+    open func createProject(_ config: ProjectConfig) -> Project? {
         
         if let poolAttempt = self.projectPool[config.id] {
             poolAttempt.config.value = config
@@ -137,13 +137,13 @@ public class SyncerFactory: SyncerFactoryType {
         return project
     }
     
-    public func createSourceServer(service: GitService, auth: ProjectAuthenticator?) -> SourceServerType {
+    open func createSourceServer(_ service: GitService, auth: ProjectAuthenticator?) -> SourceServerType {
         
         let server = SourceServerFactory().createServer(service, auth: auth)
         return server
     }
     
-    public func createTrigger(config: TriggerConfig) -> Trigger {
+    open func createTrigger(_ config: TriggerConfig) -> Trigger {
         let trigger = Trigger(config: config)
         return trigger
     }

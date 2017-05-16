@@ -29,9 +29,9 @@ class BitBucketServerTests: XCTestCase {
         super.tearDown()
     }
     
-    func prepServerWithName(name: String) {
+    func prepServerWithName(_ name: String) {
         
-        let session = DVR.Session(cassetteName: name, testBundle: NSBundle(forClass: self.classForCoder))
+        let session = DVR.Session(cassetteName: name, testBundle: Bundle(forClass: self.classForCoder))
         let http = HTTP(session: session)
         self.bitbucket = GitServerFactory.server(.BitBucket, auth: nil, http: http)
     }
@@ -40,7 +40,7 @@ class BitBucketServerTests: XCTestCase {
         
         self.prepServerWithName("bitbucket_get_prs")
         
-        let exp = self.expectationWithDescription("Waiting for url request")
+        let exp = self.expectation(description: "Waiting for url request")
         
         self.bitbucket.getOpenPullRequests("honzadvorsky/buildasaur-tester") { (prs, error) -> () in
             
@@ -60,14 +60,14 @@ class BitBucketServerTests: XCTestCase {
             exp.fulfill()
         }
         
-        self.waitForExpectationsWithTimeout(10, handler: nil)
+        self.waitForExpectations(timeout: 10, handler: nil)
     }
     
     func testGetPullRequest() {
         
         self.prepServerWithName("bitbucket_get_pr")
         
-        let exp = self.expectationWithDescription("Waiting for url request")
+        let exp = self.expectation(description: "Waiting for url request")
         
         self.bitbucket.getPullRequest(4, repo: "honzadvorsky/buildasaur-tester") { (pr, error) -> () in
             
@@ -84,14 +84,14 @@ class BitBucketServerTests: XCTestCase {
             exp.fulfill()
         }
         
-        self.waitForExpectationsWithTimeout(10, handler: nil)
+        self.waitForExpectations(timeout: 10, handler: nil)
     }
     
     func testGetRepo() {
         
         self.prepServerWithName("bitbucket_get_repo")
         
-        let exp = self.expectationWithDescription("Waiting for url request")
+        let exp = self.expectation(description: "Waiting for url request")
         
         self.bitbucket.getRepo("honzadvorsky/buildasaur-tester") { (repo, error) -> () in
             
@@ -103,14 +103,14 @@ class BitBucketServerTests: XCTestCase {
             exp.fulfill()
         }
         
-        self.waitForExpectationsWithTimeout(10, handler: nil)
+        self.waitForExpectations(timeout: 10, handler: nil)
     }
     
     func testGetComments() {
         
         self.prepServerWithName("bitbucket_get_comments")
         
-        let exp = self.expectationWithDescription("Waiting for url request")
+        let exp = self.expectation(description: "Waiting for url request")
         
         self.bitbucket.getCommentsOfIssue(4, repo: "honzadvorsky/buildasaur-tester") { (comments, error) -> () in
             
@@ -126,14 +126,14 @@ class BitBucketServerTests: XCTestCase {
             exp.fulfill()
         }
         
-        self.waitForExpectationsWithTimeout(10, handler: nil)
+        self.waitForExpectations(timeout: 10, handler: nil)
     }
 
     func testPostStatus() {
         
         self.prepServerWithName("bitbucket_post_status")
         
-        let exp = self.expectationWithDescription("Waiting for url request")
+        let exp = self.expectation(description: "Waiting for url request")
         
         let status = self.bitbucket.createStatusFromState(BuildState.Success, description: "All went great!", targetUrl: "https://stlt.herokuapp.com/v1/xcs_deeplink/honzadvysmbpr14.home/1413f8578e54c3d052b8121a250255c0/1413f8578e54c3d052b8121a2509a923")
         
@@ -149,14 +149,14 @@ class BitBucketServerTests: XCTestCase {
             exp.fulfill()
         }
         
-        self.waitForExpectationsWithTimeout(10, handler: nil)
+        self.waitForExpectations(timeout: 10, handler: nil)
     }
     
     func testGetStatus() {
         
         self.prepServerWithName("bitbucket_get_status")
         
-        let exp = self.expectationWithDescription("Waiting for url request")
+        let exp = self.expectation(description: "Waiting for url request")
         
         self.bitbucket.getStatusOfCommit("787ce95", repo: "honzadvorsky/buildasaur-tester") { (status, error) -> () in
             
@@ -170,7 +170,7 @@ class BitBucketServerTests: XCTestCase {
             exp.fulfill()
         }
         
-        self.waitForExpectationsWithTimeout(10, handler: nil)
+        self.waitForExpectations(timeout: 10, handler: nil)
     }
     
     //    func testPostComment() {

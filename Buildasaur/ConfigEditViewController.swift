@@ -31,7 +31,7 @@ class ConfigEditViewController: EditableViewController {
         self.setupAvailability()
     }
     
-    private func setupUI() {
+    fileprivate func setupUI() {
         
         if self.serverStatusImageView != nil {
             //status image
@@ -50,11 +50,11 @@ class ConfigEditViewController: EditableViewController {
     }
     
     //do not call directly! just override
-    func checkAvailability(statusChanged: ((status: AvailabilityCheckState) -> ())) {
+    func checkAvailability(_ statusChanged: ((_ status: AvailabilityCheckState) -> ())) {
         assertionFailure("Must be overriden by subclasses")
     }
         
-    @IBAction final func trashButtonClicked(sender: AnyObject) {
+    @IBAction final func trashButtonClicked(_ sender: AnyObject) {
         self.delete()
     }
     
@@ -66,7 +66,7 @@ class ConfigEditViewController: EditableViewController {
         assertionFailure("Must be overriden by subclasses")
     }
     
-    final func recheckForAvailability(completion: ((state: AvailabilityCheckState) -> ())?) {
+    final func recheckForAvailability(_ completion: ((_ state: AvailabilityCheckState) -> ())?) {
         self.editingAllowed.value = false
         self.checkAvailability { [weak self] (status) -> () in
             self?.availabilityCheckState.value = status
@@ -77,7 +77,7 @@ class ConfigEditViewController: EditableViewController {
         }
     }
     
-    private func setupAvailability() {
+    fileprivate func setupAvailability() {
         
         let state = self.availabilityCheckState.producer
         if let progress = self.progressIndicator {
@@ -88,7 +88,7 @@ class ConfigEditViewController: EditableViewController {
         }
     }
     
-    private static func stringForState(state: AvailabilityCheckState) -> String {
+    fileprivate static func stringForState(_ state: AvailabilityCheckState) -> String {
         
         //TODO: add some emoji!
         switch state {
@@ -104,7 +104,7 @@ class ConfigEditViewController: EditableViewController {
         }
     }
     
-    private static func imageNameForStatus(status: AvailabilityCheckState) -> String {
+    fileprivate static func imageNameForStatus(_ status: AvailabilityCheckState) -> String {
         
         switch status {
         case .Unchecked:

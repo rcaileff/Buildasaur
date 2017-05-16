@@ -27,7 +27,7 @@ class SyncerTests: XCTestCase {
         super.tearDown()
     }
     
-    func mockedSyncer(config: SyncerConfig = SyncerConfig()) -> StandardSyncer {
+    func mockedSyncer(_ config: SyncerConfig = SyncerConfig()) -> StandardSyncer {
         
         let xcodeServer = MockXcodeServer()
         let githubServer = MockGitHubServer()

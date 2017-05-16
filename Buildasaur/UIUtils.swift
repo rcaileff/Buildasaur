@@ -10,9 +10,9 @@ import Foundation
 import AppKit
 import BuildaUtils
 
-public class UIUtils {
+open class UIUtils {
     
-    public class func showAlertWithError(error: ErrorType) {
+    open class func showAlertWithError(_ error: Error) {
         
         let alert = self.createErrorAlert(error)
         self.presentAlert(alert, completion: { (resp) -> () in
@@ -20,55 +20,55 @@ public class UIUtils {
         })
     }
     
-    public class func showAlertAskingConfirmation(text: String, dangerButton: String, completion: (confirmed: Bool) -> ()) {
+    open class func showAlertAskingConfirmation(_ text: String, dangerButton: String, completion: @escaping (_ confirmed: Bool) -> ()) {
         
         let buttons = ["Cancel", dangerButton]
         self.showAlertWithButtons(text, buttons: buttons) { (tappedButton) -> () in
-            completion(confirmed: dangerButton == tappedButton)
+            completion(dangerButton == tappedButton)
         }
     }
 
     
-    public class func showAlertAskingForRemoval(text: String, completion: (remove: Bool) -> ()) {
+    open class func showAlertAskingForRemoval(_ text: String, completion: @escaping (_ remove: Bool) -> ()) {
         self.showAlertAskingConfirmation(text, dangerButton: "Remove", completion: completion)
     }
     
-    public class func showAlertWithButtons(text: String, buttons: [String], style: NSAlertStyle? = nil, completion: (tappedButton: String) -> ()) {
+    open class func showAlertWithButtons(_ text: String, buttons: [String], style: NSAlertStyle? = nil, completion: @escaping (_ tappedButton: String) -> ()) {
         
         let alert = self.createAlert(text, style: style)
         
-        buttons.forEach { alert.addButtonWithTitle($0) }
+        buttons.forEach { alert.addButton(withTitle: $0) }
         
         self.presentAlert(alert, completion: { (resp) -> () in
             
             //some magic where indices are starting at 1000... so subtract 1000 to get the array index of tapped button
             let idx = resp - NSAlertFirstButtonReturn
             let buttonText = buttons[idx]
-            completion(tappedButton: buttonText)
+            completion(buttonText)
         })
     }
     
-    public class func showAlertWithText(text: String, style: NSAlertStyle? = nil, completion: ((NSModalResponse) -> ())? = nil) {
+    open class func showAlertWithText(_ text: String, style: NSAlertStyle? = nil, completion: ((NSModalResponse) -> ())? = nil) {
 
         let alert = self.createAlert(text, style: style)
         self.presentAlert(alert, completion: completion)
     }
     
-    private class func createErrorAlert(error: ErrorType) -> NSAlert {
+    fileprivate class func createErrorAlert(_ error: Error) -> NSAlert {
         return NSAlert(error: error as NSError)
     }
     
-    private class func createAlert(text: String, style: NSAlertStyle?) -> NSAlert {
+    fileprivate class func createAlert(_ text: String, style: NSAlertStyle?) -> NSAlert {
         
         let alert = NSAlert()
         
-        alert.alertStyle = style ?? .Informational
+        alert.alertStyle = style ?? .informational
         alert.messageText = text
         
         return alert
     }
     
-    private class func presentAlert(alert: NSAlert, completion: ((NSModalResponse) -> ())?) {
+    fileprivate class func presentAlert(_ alert: NSAlert, completion: ((NSModalResponse) -> ())?) {
         
         if let _ = NSApp.windows.first {
             let resp = alert.runModal()
@@ -83,9 +83,9 @@ public class UIUtils {
 
 extension NSPopUpButton {
     
-    public func replaceItems(newItems: [String]) {
+    public func replaceItems(_ newItems: [String]) {
         self.removeAllItems()
-        self.addItemsWithTitles(newItems)
+        self.addItems(withTitles: newItems)
     }
 }
 

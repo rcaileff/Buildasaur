@@ -13,25 +13,25 @@ import ReactiveCocoa
 import Result
 import BuildaGitServer
 
-public enum StorageManagerError: ErrorType {
-    case DuplicateServerConfig(XcodeServerConfig)
-    case DuplicateProjectConfig(ProjectConfig)
+public enum StorageManagerError: Error {
+    case duplicateServerConfig(XcodeServerConfig)
+    case duplicateProjectConfig(ProjectConfig)
 }
 
-public class StorageManager {
+open class StorageManager {
     
-    public let syncerConfigs = MutableProperty<[String: SyncerConfig]>([:])
-    public let serverConfigs = MutableProperty<[String: XcodeServerConfig]>([:])
-    public let projectConfigs = MutableProperty<[String: ProjectConfig]>([:])
-    public let buildTemplates = MutableProperty<[String: BuildTemplate]>([:])
-    public let triggerConfigs = MutableProperty<[String: TriggerConfig]>([:])
-    public let config = MutableProperty<[String: AnyObject]>([:])
+    open let syncerConfigs = MutableProperty<[String: SyncerConfig]>([:])
+    open let serverConfigs = MutableProperty<[String: XcodeServerConfig]>([:])
+    open let projectConfigs = MutableProperty<[String: ProjectConfig]>([:])
+    open let buildTemplates = MutableProperty<[String: BuildTemplate]>([:])
+    open let triggerConfigs = MutableProperty<[String: TriggerConfig]>([:])
+    open let config = MutableProperty<[String: AnyObject]>([:])
     
     let tokenKeychain = SecurePersistence.sourceServerTokenKeychain()
     let passphraseKeychain = SecurePersistence.sourceServerPassphraseKeychain()
     let serverConfigKeychain = SecurePersistence.xcodeServerPasswordKeychain()
     
-    private let persistence: Persistence
+    fileprivate let persistence: Persistence
     
     public init(persistence: Persistence) {
         
@@ -44,25 +44,25 @@ public class StorageManager {
         //
     }
     
-    public func checkForProjectOrWorkspace(url: NSURL) throws {
+    open func checkForProjectOrWorkspace(_ url: URL) throws {
         _ = try Project.attemptToParseFromUrl(url)
     }
     
     //MARK: adding
 
-    public func addSyncerConfig(config: SyncerConfig) {
+    open func addSyncerConfig(_ config: SyncerConfig) {
         self.syncerConfigs.value[config.id] = config
     }
 
-    public func addTriggerConfig(triggerConfig: TriggerConfig) {
+    open func addTriggerConfig(_ triggerConfig: TriggerConfig) {
         self.triggerConfigs.value[triggerConfig.id] = triggerConfig
     }
     
-    public func addBuildTemplate(buildTemplate: BuildTemplate) {
+    open func addBuildTemplate(_ buildTemplate: BuildTemplate) {
         self.buildTemplates.value[buildTemplate.id] = buildTemplate
     }
     
-    public func addServerConfig(config: XcodeServerConfig) throws {
+    open func addServerConfig(_ config: XcodeServerConfig) throws {
         
         //verify we don't have a duplicate
         let currentConfigs: [String: XcodeServerConfig] = self.serverConfigs.value
@@ -81,7 +81,7 @@ public class StorageManager {
         self.serverConfigs.value[config.id] = config
     }
     
-    public func addProjectConfig(config: ProjectConfig) throws {
+    open func addProjectConfig(_ config: ProjectConfig) throws {
         
         //verify we don't have a duplicate
         let currentConfigs: [String: ProjectConfig] = self.projectConfigs.value
@@ -93,7 +93,7 @@ public class StorageManager {
             .filter { $0.id != config.id }
             .first
         if let duplicate = dup {
-            throw StorageManagerError.DuplicateProjectConfig(duplicate)
+            throw StorageManagerError.duplicateProjectConfig(duplicate)
         }
         
         //no duplicate, save!
@@ -102,29 +102,29 @@ public class StorageManager {
     
     //MARK: removing
     
-    public func removeTriggerConfig(triggerConfig: TriggerConfig) {
+    open func removeTriggerConfig(_ triggerConfig: TriggerConfig) {
         self.triggerConfigs.value.removeValueForKey(triggerConfig.id)
     }
     
-    public func removeBuildTemplate(buildTemplate: BuildTemplate) {
+    open func removeBuildTemplate(_ buildTemplate: BuildTemplate) {
         self.buildTemplates.value.removeValueForKey(buildTemplate.id)
     }
     
-    public func removeProjectConfig(projectConfig: ProjectConfig) {
+    open func removeProjectConfig(_ projectConfig: ProjectConfig) {
         
         //TODO: make sure this project config is not owned by a project which
         //is running right now.
         self.projectConfigs.value.removeValueForKey(projectConfig.id)
     }
     
-    public func removeServer(serverConfig: XcodeServerConfig) {
+    open func removeServer(_ serverConfig: XcodeServerConfig) {
         
         //TODO: make sure this server config is not owned by a server which
         //is running right now.
         self.serverConfigs.value.removeValueForKey(serverConfig.id)
     }
     
-    public func removeSyncer(syncerConfig: SyncerConfig) {
+    open func removeSyncer(_ syncerConfig: SyncerConfig) {
         
         //TODO: make sure this syncer config is not owned by a syncer which
         //is running right now.
@@ -133,13 +133,13 @@ public class StorageManager {
     
     //MARK: lookup
     
-    public func triggerConfigsForIds(ids: [RefType]) -> [TriggerConfig] {
+    open func triggerConfigsForIds(_ ids: [RefType]) -> [TriggerConfig] {
         
         let idsSet = Set(ids)
         return self.triggerConfigs.value.map { $0.1 }.filter { idsSet.contains($0.id) }
     }
     
-    public func buildTemplatesForProjectName(projectName: String) -> SignalProducer<[BuildTemplate], NoError> {
+    open func buildTemplatesForProjectName(_ projectName: String) -> SignalProducer<[BuildTemplate], NoError> {
         
         //filter all build templates with the project name || with no project name (legacy reasons)
         return self
@@ -158,11 +158,11 @@ public class StorageManager {
         }
     }
     
-    private func projectForRef(ref: RefType) -> ProjectConfig? {
+    fileprivate func projectForRef(_ ref: RefType) -> ProjectConfig? {
         return self.projectConfigs.value[ref]
     }
     
-    private func serverForHost(host: String) -> XcodeServer? {
+    fileprivate func serverForHost(_ host: String) -> XcodeServer? {
         guard let config = self.serverConfigs.value[host] else { return nil }
         let server = XcodeServerFactory.server(config)
         return server
@@ -170,7 +170,7 @@ public class StorageManager {
     
     //MARK: loading
     
-    private func loadAllFromPersistence() {
+    fileprivate func loadAllFromPersistence() {
         
         self.config.value = self.persistence.loadDictionaryFromFile("Config.json") ?? [:]
         
@@ -212,7 +212,7 @@ public class StorageManager {
     
     //MARK: Saving
     
-    private func setupSaving() {
+    fileprivate func setupSaving() {
         
         //simple - save on every change after the initial bunch has been loaded!
         
@@ -236,11 +236,11 @@ public class StorageManager {
         }
     }
     
-    private func saveConfig(config: [String: AnyObject]) {
+    fileprivate func saveConfig(_ config: [String: AnyObject]) {
         self.persistence.saveDictionary("Config.json", item: config)
     }
     
-    private func saveProjectConfigs(configs: [String: ProjectConfig]) {
+    fileprivate func saveProjectConfigs(_ configs: [String: ProjectConfig]) {
         let projectConfigs: NSArray = Array(configs.values).map { $0.jsonify() }
         let tokenKeychain = SecurePersistence.sourceServerTokenKeychain()
         let passphraseKeychain = SecurePersistence.sourceServerPassphraseKeychain()
@@ -253,7 +253,7 @@ public class StorageManager {
         self.persistence.saveArray("Projects.json", items: projectConfigs)
     }
     
-    private func saveServerConfigs(configs: [String: XcodeServerConfig]) {
+    fileprivate func saveServerConfigs(_ configs: [String: XcodeServerConfig]) {
         let serverConfigs = Array(configs.values).map { $0.jsonify() }
         let serverConfigKeychain = SecurePersistence.xcodeServerPasswordKeychain()
         configs.values.forEach {
@@ -262,12 +262,12 @@ public class StorageManager {
         self.persistence.saveArray("ServerConfigs.json", items: serverConfigs)
     }
     
-    private func saveSyncerConfigs(configs: [String: SyncerConfig]) {
+    fileprivate func saveSyncerConfigs(_ configs: [String: SyncerConfig]) {
         let syncerConfigs = Array(configs.values).map { $0.jsonify() }
         self.persistence.saveArray("Syncers.json", items: syncerConfigs)
     }
     
-    private func saveBuildTemplates(templates: [String: BuildTemplate]) {
+    fileprivate func saveBuildTemplates(_ templates: [String: BuildTemplate]) {
         
         //but first we have to *delete* the directory first.
         //think of a nicer way to do this, but this at least will always
@@ -278,7 +278,7 @@ public class StorageManager {
         self.persistence.saveArrayIntoFolder(folderName, items: items) { $0.id }
     }
     
-    private func saveTriggerConfigs(configs: [String: TriggerConfig]) {
+    fileprivate func saveTriggerConfigs(_ configs: [String: TriggerConfig]) {
         
         //but first we have to *delete* the directory first.
         //think of a nicer way to do this, but this at least will always
@@ -292,7 +292,7 @@ public class StorageManager {
 
 extension StorageManager: SyncerLifetimeChangeObserver {
     
-    public func authChanged(projectConfigId: String, auth: ProjectAuthenticator) {
+    public func authChanged(_ projectConfigId: String, auth: ProjectAuthenticator) {
         
         //and modify in the owner's config
         var config = self.projectConfigs.value[projectConfigId]!
@@ -315,7 +315,7 @@ extension TriggerConfig: JSONReadable, JSONWritable {
 //Syncer Parsing
 extension StorageManager {
     
-    private func createSyncerConfigFromJSON(json: NSDictionary) -> SyncerConfig? {
+    fileprivate func createSyncerConfigFromJSON(_ json: NSDictionary) -> SyncerConfig? {
         
         do {
             return try SyncerConfig(json: json)

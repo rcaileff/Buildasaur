@@ -31,7 +31,7 @@ class BitBucketServer : GitServer {
 
 extension BitBucketServer: SourceServerType {
     
-    func createStatusFromState(state: BuildState, description: String?, targetUrl: String?) -> StatusType {
+    func createStatusFromState(_ state: BuildState, description: String?, targetUrl: String?) -> StatusType {
         
         let bbState = BitBucketStatus.BitBucketState.fromBuildState(state)
         let key = "Buildasaur"
@@ -39,13 +39,13 @@ extension BitBucketServer: SourceServerType {
         return BitBucketStatus(state: bbState, key: key, name: key, description: description, url: url)
     }
     
-    func getBranchesOfRepo(repo: String, completion: (branches: [BranchType]?, error: ErrorType?) -> ()) {
+    func getBranchesOfRepo(_ repo: String, completion: (_ branches: [BranchType]?, _ error: Error?) -> ()) {
         
         //TODO: start returning branches
-        completion(branches: [], error: nil)
+        completion([], nil)
     }
     
-    func getOpenPullRequests(repo: String, completion: (prs: [PullRequestType]?, error: ErrorType?) -> ()) {
+    func getOpenPullRequests(_ repo: String, completion: @escaping (_ prs: [PullRequestType]?, _ error: Error?) -> ()) {
         
         let params = [
             "repo": repo
@@ -66,7 +66,7 @@ extension BitBucketServer: SourceServerType {
         }
     }
     
-    func getPullRequest(pullRequestNumber: Int, repo: String, completion: (pr: PullRequestType?, error: ErrorType?) -> ()) {
+    func getPullRequest(_ pullRequestNumber: Int, repo: String, completion: @escaping (_ pr: PullRequestType?, _ error: Error?) -> ()) {
         
         let params = [
             "repo": repo,
@@ -89,7 +89,7 @@ extension BitBucketServer: SourceServerType {
         }
     }
     
-    func getRepo(repo: String, completion: (repo: RepoType?, error: ErrorType?) -> ()) {
+    func getRepo(_ repo: String, completion: @escaping (_ repo: RepoType?, _ error: Error?) -> ()) {
         
         let params = [
             "repo": repo
@@ -112,7 +112,7 @@ extension BitBucketServer: SourceServerType {
         }
     }
     
-    func getStatusOfCommit(commit: String, repo: String, completion: (status: StatusType?, error: ErrorType?) -> ()) {
+    func getStatusOfCommit(_ commit: String, repo: String, completion: @escaping (_ status: StatusType?, _ error: Error?) -> ()) {
         
         let params = [
             "repo": repo,
@@ -142,7 +142,7 @@ extension BitBucketServer: SourceServerType {
         }
     }
     
-    func postStatusOfCommit(commit: String, status: StatusType, repo: String, completion: (status: StatusType?, error: ErrorType?) -> ()) {
+    func postStatusOfCommit(_ commit: String, status: StatusType, repo: String, completion: @escaping (_ status: StatusType?, _ error: Error?) -> ()) {
         
         let params = [
             "repo": repo,
@@ -166,7 +166,7 @@ extension BitBucketServer: SourceServerType {
         }
     }
     
-    func postCommentOnIssue(comment: String, issueNumber: Int, repo: String, completion: (comment: CommentType?, error: ErrorType?) -> ()) {
+    func postCommentOnIssue(_ comment: String, issueNumber: Int, repo: String, completion: @escaping (_ comment: CommentType?, _ error: Error?) -> ()) {
         
         let params = [
             "repo": repo,
@@ -193,7 +193,7 @@ extension BitBucketServer: SourceServerType {
         }
     }
     
-    func getCommentsOfIssue(issueNumber: Int, repo: String, completion: (comments: [CommentType]?, error: ErrorType?) -> ()) {
+    func getCommentsOfIssue(_ issueNumber: Int, repo: String, completion: @escaping (_ comments: [CommentType]?, _ error: Error?) -> ()) {
         
         let params = [
             "repo": repo,
@@ -219,7 +219,7 @@ extension BitBucketServer: SourceServerType {
 
 extension BitBucketServer {
     
-    private func _sendRequest(request: NSMutableURLRequest, isRetry: Bool = false, completion: HTTP.Completion) {
+    fileprivate func _sendRequest(_ request: NSMutableURLRequest, isRetry: Bool = false, completion: HTTP.Completion) {
         
         self.http.sendRequest(request) { (response, body, error) -> () in
             
@@ -251,7 +251,7 @@ extension BitBucketServer {
         }
     }
     
-    private func _handle401(request: NSMutableURLRequest, completion: HTTP.Completion) {
+    fileprivate func _handle401(_ request: NSMutableURLRequest, completion: HTTP.Completion) {
         
         //we need to use the refresh token to request a new access token
         //then we need to notify that we updated the secret, so that it can
@@ -281,7 +281,7 @@ extension BitBucketServer {
         }
     }
     
-    private func _refreshAccessToken(request: NSMutableURLRequest, completion: (NSError?) -> ()) {
+    fileprivate func _refreshAccessToken(_ request: NSMutableURLRequest, completion: @escaping (NSError?) -> ()) {
         
         let refreshRequest = self.endpoints.createRefreshTokenRequest()
         self.http.sendRequest(refreshRequest) { (response, body, error) -> () in
@@ -307,7 +307,7 @@ extension BitBucketServer {
         }
     }
     
-    private func _sendRequestWithMethod(method: HTTP.Method, endpoint: BitBucketEndpoints.Endpoint, params: [String: String]?, query: [String: String]?, body: NSDictionary?, completion: HTTP.Completion) {
+    fileprivate func _sendRequestWithMethod(_ method: HTTP.Method, endpoint: BitBucketEndpoints.Endpoint, params: [String: String]?, query: [String: String]?, body: NSDictionary?, completion: HTTP.Completion) {
         
         var allParams = [
             "method": method.rawValue
@@ -328,7 +328,7 @@ extension BitBucketServer {
         }
     }
     
-    private func _sendRequestWithPossiblePagination(request: NSMutableURLRequest, accumulatedResponseBody: NSArray, completion: HTTP.Completion) {
+    fileprivate func _sendRequestWithPossiblePagination(_ request: NSMutableURLRequest, accumulatedResponseBody: NSArray, completion: HTTP.Completion) {
         
         self._sendRequest(request) {
             (response, body, error) -> () in

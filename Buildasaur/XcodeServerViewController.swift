@@ -13,8 +13,8 @@ import BuildaKit
 import ReactiveCocoa
 
 protocol XcodeServerViewControllerDelegate: class {
-    func didCancelEditingOfXcodeServerConfig(config: XcodeServerConfig)
-    func didSaveXcodeServerConfig(config: XcodeServerConfig)
+    func didCancelEditingOfXcodeServerConfig(_ config: XcodeServerConfig)
+    func didSaveXcodeServerConfig(_ config: XcodeServerConfig)
 }
 
 class XcodeServerViewController: ConfigEditViewController {
@@ -92,7 +92,7 @@ class XcodeServerViewController: ConfigEditViewController {
         return false
     }
     
-    private func cancel() {
+    fileprivate func cancel() {
         //throw away this setup, don't save anything (but don't delete either)
         self.delegate?.didCancelEditingOfXcodeServerConfig(self.serverConfig.value)
     }
@@ -141,7 +141,7 @@ class XcodeServerViewController: ConfigEditViewController {
         self.cancel()
     }
     
-    override func checkAvailability(statusChanged: ((status: AvailabilityCheckState) -> ())) {
+    override func checkAvailability(_ statusChanged: ((_ status: AvailabilityCheckState) -> ())) {
         
         let config = self.serverConfig.value
         let checkAction = AvailabilityChecker.xcodeServerAvailability()

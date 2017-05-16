@@ -29,7 +29,7 @@ class BitBucketEntity : BitBucketType {
         return NSDictionary()
     }
     
-    class func optional<T: BitBucketEntity>(json: NSDictionary?) -> T? {
+    class func optional<T: BitBucketEntity>(_ json: NSDictionary?) -> T? {
         if let json = json {
             return T(json: json)
         }
@@ -39,7 +39,7 @@ class BitBucketEntity : BitBucketType {
 }
 
 //parse an array of dictionaries into an array of parsed entities
-func BitBucketArray<T where T: BitBucketType>(jsonArray: [NSDictionary]) -> [T] {
+func BitBucketArray<T>(_ jsonArray: [NSDictionary]) -> [T] where T: BitBucketType {
     
     let parsed = jsonArray.map {
         (json: NSDictionary) -> (T) in

@@ -36,7 +36,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var windows: Set<NSWindow> = []
     var updater: SUUpdater?
     
-    func applicationDidFinishLaunching(aNotification: NSNotification) {
+    func applicationDidFinishLaunching(_ aNotification: Notification) {
         
         #if TESTING
             print("Testing configuration, not launching the app")
@@ -75,9 +75,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         #endif
     }
     
-    func migratePersistence(persistence: Persistence) {
+    func migratePersistence(_ persistence: Persistence) {
         
-        let fileManager = NSFileManager.defaultManager()
+        let fileManager = FileManager.default
         //before we create the storage manager, attempt migration first
         let migrator = CompositeMigrator(persistence: persistence)
         if migrator.isMigrationRequired() {
@@ -116,14 +116,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let syncerManager = SyncerManager(storageManager: storageManager, factory: factory, loginItem: loginItem)
         self.syncerManager = syncerManager
         
-        if let crashlyticsOptOut = storageManager.config.value["crash_reporting_opt_out"] as? Bool where crashlyticsOptOut {
+        if let crashlyticsOptOut = storageManager.config.value["crash_reporting_opt_out"] as? Bool, crashlyticsOptOut {
             Log.info("User opted out of crash reporting")
         } else {
             #if DEBUG
                 Log.info("Not starting Crashlytics in debug mode.")
             #else
                 Log.info("Will send crashlogs to Crashlytics. To opt out add `\"crash_reporting_opt_out\" = true` to ~/Library/Application Support/Buildasaur/Config.json")
-                NSUserDefaults.standardUserDefaults().registerDefaults([
+                UserDefaults.standard.register(defaults: [
                     "NSApplicationCrashOnExceptions": true
                     ])
                 Fabric.with([Crashlytics.self])
@@ -140,7 +140,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return dashboard
     }
     
-    func handleUrl(url: NSURL) {
+    func handleUrl(_ url: URL) {
         
         print("Handling incoming url")
         
@@ -149,18 +149,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
-    func applicationShouldHandleReopen(sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         
         self.showMainWindow()
         return true
     }
     
-    func applicationDidBecomeActive(notification: NSNotification) {
+    func applicationDidBecomeActive(_ notification: Notification) {
         
         self.showMainWindow()
     }
     
-    func applicationShouldTerminate(sender: NSApplication) -> NSApplicationTerminateReply {
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplicationTerminateReply {
         
         let runningCount = self.syncerManager.syncers.filter({ $0.active }).count
         if runningCount > 0 {
@@ -171,13 +171,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 NSApp.replyToApplicationShouldTerminate(quit)
             }
             
-            return NSApplicationTerminateReply.TerminateLater
+            return NSApplicationTerminateReply.terminateLater
         } else {
-            return NSApplicationTerminateReply.TerminateNow
+            return NSApplicationTerminateReply.terminateNow
         }
     }
     
-    func applicationWillTerminate(aNotification: NSNotification) {
+    func applicationWillTerminate(_ aNotification: Notification) {
         
         //stop syncers properly
         self.syncerManager.stopSyncers()
@@ -187,7 +187,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func showMainWindow(){
         
-        NSApp.activateIgnoringOtherApps(true)
+        NSApp.activate(ignoringOtherApps: true)
         
         //first window. i wish there was a nicer way (please someone tell me there is)
         if NSApp.windows.count < 3 {
@@ -196,14 +196,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     //Sparkle magic
-    func checkForUpdates(sender: AnyObject!) {
+    func checkForUpdates(_ sender: AnyObject!) {
         self.updater?.checkForUpdates(sender)
     }
 }
 
 extension AppDelegate: SUUpdaterDelegate {
     
-    func updater(updater: SUUpdater!, willInstallUpdate item: SUAppcastItem!) {
+    func updater(_ updater: SUUpdater!, willInstallUpdate item: SUAppcastItem!) {
         self.syncerManager.heartbeatManager?.willInstallSparkleUpdate()
     }
 }
@@ -213,11 +213,11 @@ extension AppDelegate {
     func setupURLCallback() {
         
         // listen to scheme url
-        NSAppleEventManager.sharedAppleEventManager().setEventHandler(self, andSelector:#selector(AppDelegate.handleGetURLEvent(_:withReplyEvent:)), forEventClass: AEEventClass(kInternetEventClass), andEventID: AEEventID(kAEGetURL))
+        NSAppleEventManager.shared().setEventHandler(self, andSelector:#selector(AppDelegate.handleGetURLEvent(_:withReplyEvent:)), forEventClass: AEEventClass(kInternetEventClass), andEventID: AEEventID(kAEGetURL))
     }
     
-    func handleGetURLEvent(event: NSAppleEventDescriptor!, withReplyEvent: NSAppleEventDescriptor!) {
-        if let urlString = event.paramDescriptorForKeyword(AEKeyword(keyDirectObject))?.stringValue, url = NSURL(string: urlString) {
+    func handleGetURLEvent(_ event: NSAppleEventDescriptor!, withReplyEvent: NSAppleEventDescriptor!) {
+        if let urlString = event.paramDescriptor(forKeyword: AEKeyword(keyDirectObject))?.stringValue, let url = URL(string: urlString) {
             
             //handle url
             self.handleUrl(url)
@@ -227,12 +227,12 @@ extension AppDelegate {
 
 extension AppDelegate: PresentableViewControllerDelegate {
     
-    func configureViewController(viewController: PresentableViewController) {
+    func configureViewController(_ viewController: PresentableViewController) {
         
         //
     }
     
-    func presentViewControllerInUniqueWindow(viewController: PresentableViewController) {
+    func presentViewControllerInUniqueWindow(_ viewController: PresentableViewController) {
         
         //last chance to config
         self.configureViewController(viewController)
@@ -253,14 +253,14 @@ extension AppDelegate: PresentableViewControllerDelegate {
             //if we already are showing some windows, let's cascade the new one
             if self.windows.count > 0 {
                 //find the right-most window and cascade from it
-                let rightMost = self.windows.reduce(CGPoint(x: 0.0, y: 0.0), combine: { (right: CGPoint, window: NSWindow) -> CGPoint in
+                let rightMost = self.windows.reduce(CGPoint(x: 0.0, y: 0.0), { (right: CGPoint, window: NSWindow) -> CGPoint in
                     let origin = window.frame.origin
                     if origin.x > right.x {
                         return origin
                     }
                     return right
                 })
-                let newOrigin = newWindow!.cascadeTopLeftFromPoint(rightMost)
+                let newOrigin = newWindow!.cascadeTopLeft(from: rightMost)
                 newWindow?.setFrameTopLeftPoint(newOrigin)
             }
         }
@@ -272,7 +272,7 @@ extension AppDelegate: PresentableViewControllerDelegate {
         window.makeKeyAndOrderFront(self)
     }
     
-    func closeWindowWithViewController(viewController: PresentableViewController) {
+    func closeWindowWithViewController(_ viewController: PresentableViewController) {
         
         if let window = self.windowForPresentableViewControllerWithIdentifier(viewController.uniqueIdentifier)?.0 {
             
@@ -285,7 +285,7 @@ extension AppDelegate: PresentableViewControllerDelegate {
 
 extension AppDelegate: StoryboardLoaderDelegate {
     
-    func windowForPresentableViewControllerWithIdentifier(identifier: String) -> (NSWindow, PresentableViewController)? {
+    func windowForPresentableViewControllerWithIdentifier(_ identifier: String) -> (NSWindow, PresentableViewController)? {
         
         for window in self.windows {
             
@@ -298,7 +298,7 @@ extension AppDelegate: StoryboardLoaderDelegate {
         return nil
     }
     
-    func storyboardLoaderExistingViewControllerWithIdentifier(identifier: String) -> PresentableViewController? {
+    func storyboardLoaderExistingViewControllerWithIdentifier(_ identifier: String) -> PresentableViewController? {
         //look through our windows and their view controllers to see if we can't find this view controller
         let pair = self.windowForPresentableViewControllerWithIdentifier(identifier)
         return pair?.1
@@ -307,7 +307,7 @@ extension AppDelegate: StoryboardLoaderDelegate {
 
 extension AppDelegate: NSWindowDelegate {
     
-    func windowShouldClose(sender: AnyObject) -> Bool {
+    func windowShouldClose(_ sender: Any) -> Bool {
         
         if let window = sender as? NSWindow {
             self.windows.remove(window)

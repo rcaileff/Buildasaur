@@ -15,8 +15,8 @@ import ReactiveCocoa
 import Result
 
 protocol BuildTemplateViewControllerDelegate: class {
-    func didCancelEditingOfBuildTemplate(template: BuildTemplate)
-    func didSaveBuildTemplate(template: BuildTemplate)
+    func didCancelEditingOfBuildTemplate(_ template: BuildTemplate)
+    func didSaveBuildTemplate(_ template: BuildTemplate)
 }
 
 class BuildTemplateViewController: ConfigEditViewController, NSTableViewDataSource, NSTableViewDelegate {
@@ -28,8 +28,8 @@ class BuildTemplateViewController: ConfigEditViewController, NSTableViewDataSour
     
     // ---
     
-    private var project = MutableProperty<Project!>(nil)
-    private var xcodeServer = MutableProperty<XcodeServer!>(nil)
+    fileprivate var project = MutableProperty<Project!>(nil)
+    fileprivate var xcodeServer = MutableProperty<XcodeServer!>(nil)
     
     @IBOutlet weak var nameTextField: NSTextField!
     @IBOutlet weak var testDevicesActivityIndicator: NSProgressIndicator!
@@ -45,28 +45,28 @@ class BuildTemplateViewController: ConfigEditViewController, NSTableViewDataSour
     @IBOutlet weak var deviceFilterStackItem: NSStackView!
     @IBOutlet weak var testDevicesStackItem: NSStackView!
     
-    private let isDevicesUpToDate = MutableProperty<Bool>(true)
-    private let isPlatformsUpToDate = MutableProperty<Bool>(true)
-    private let isDeviceFiltersUpToDate = MutableProperty<Bool>(true)
+    fileprivate let isDevicesUpToDate = MutableProperty<Bool>(true)
+    fileprivate let isPlatformsUpToDate = MutableProperty<Bool>(true)
+    fileprivate let isDeviceFiltersUpToDate = MutableProperty<Bool>(true)
     
-    private let testingDevices = MutableProperty<[Device]>([])
-    private let schemes = MutableProperty<[XcodeScheme]>([])
-    private let schedules = MutableProperty<[BotSchedule.Schedule]>([])
-    private let cleaningPolicies = MutableProperty<[BotConfiguration.CleaningPolicy]>([])
-    private var deviceFilters = MutableProperty<[DeviceFilter.FilterType]>([])
+    fileprivate let testingDevices = MutableProperty<[Device]>([])
+    fileprivate let schemes = MutableProperty<[XcodeScheme]>([])
+    fileprivate let schedules = MutableProperty<[BotSchedule.Schedule]>([])
+    fileprivate let cleaningPolicies = MutableProperty<[BotConfiguration.CleaningPolicy]>([])
+    fileprivate var deviceFilters = MutableProperty<[DeviceFilter.FilterType]>([])
     
-    private var selectedScheme: MutableProperty<String>!
-    private var platformType: SignalProducer<DevicePlatform.PlatformType, NoError>!
-    private let cleaningPolicy = MutableProperty<BotConfiguration.CleaningPolicy>(.Never)
-    private let deviceFilter = MutableProperty<DeviceFilter.FilterType>(.AllAvailableDevicesAndSimulators)
-    private let selectedSchedule = MutableProperty<BotSchedule>(BotSchedule.manualBotSchedule())
-    private let selectedDeviceIds = MutableProperty<[String]>([])
-    private let triggers = MutableProperty<[TriggerConfig]>([])
+    fileprivate var selectedScheme: MutableProperty<String>!
+    fileprivate var platformType: SignalProducer<DevicePlatform.PlatformType, NoError>!
+    fileprivate let cleaningPolicy = MutableProperty<BotConfiguration.CleaningPolicy>(.Never)
+    fileprivate let deviceFilter = MutableProperty<DeviceFilter.FilterType>(.AllAvailableDevicesAndSimulators)
+    fileprivate let selectedSchedule = MutableProperty<BotSchedule>(BotSchedule.manualBotSchedule())
+    fileprivate let selectedDeviceIds = MutableProperty<[String]>([])
+    fileprivate let triggers = MutableProperty<[TriggerConfig]>([])
     
-    private let isValid = MutableProperty<Bool>(false)
-    private var generatedTemplate: MutableProperty<BuildTemplate>!
+    fileprivate let isValid = MutableProperty<Bool>(false)
+    fileprivate var generatedTemplate: MutableProperty<BuildTemplate>!
     
-    private var triggerToEdit: TriggerConfig?
+    fileprivate var triggerToEdit: TriggerConfig?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -74,7 +74,7 @@ class BuildTemplateViewController: ConfigEditViewController, NSTableViewDataSour
         self.setupBindings()
     }
     
-    private func setupBindings() {
+    fileprivate func setupBindings() {
         
         //request project and server for specific refs from the syncer manager
         self.syncerManager
@@ -199,7 +199,7 @@ class BuildTemplateViewController: ConfigEditViewController, NSTableViewDataSour
         self.setupGeneratedTemplate()
     }
     
-    private func devicePlatformFromScheme(schemeName: String) -> SignalProducer<DevicePlatform.PlatformType, NoError> {
+    fileprivate func devicePlatformFromScheme(_ schemeName: String) -> SignalProducer<DevicePlatform.PlatformType, NoError> {
         return SignalProducer { [weak self] sink, _ in
             guard let sself = self else { return }
             guard let scheme = sself.schemes.value.filter({ $0.name == schemeName }).first else {
@@ -216,7 +216,7 @@ class BuildTemplateViewController: ConfigEditViewController, NSTableViewDataSour
         }
     }
     
-    private func setupSchemes() {
+    fileprivate func setupSchemes() {
         
         //data source
         let schemeNames = self.schemes.producer
@@ -239,7 +239,7 @@ class BuildTemplateViewController: ConfigEditViewController, NSTableViewDataSour
         self.schemesPopup.rac_command = toRACCommand(action)
     }
     
-    private func setupSchedules() {
+    fileprivate func setupSchedules() {
         
         self.schedules.value = self.allSchedules()
         let scheduleNames = self.schedules
@@ -274,7 +274,7 @@ class BuildTemplateViewController: ConfigEditViewController, NSTableViewDataSour
         self.schedulePopup.rac_command = toRACCommand(action)
     }
     
-    private func setupCleaningPolicies() {
+    fileprivate func setupCleaningPolicies() {
         
         //data source
         self.cleaningPolicies.value = self.allCleaningPolicies()
@@ -299,7 +299,7 @@ class BuildTemplateViewController: ConfigEditViewController, NSTableViewDataSour
         self.cleaningPolicyPopup.rac_command = toRACCommand(action)
     }
     
-    private func setupDeviceFilter() {
+    fileprivate func setupDeviceFilter() {
         
         //data source
         self.deviceFilters <~ self.platformType.map {
@@ -351,9 +351,9 @@ class BuildTemplateViewController: ConfigEditViewController, NSTableViewDataSour
         self.deviceFilterPopup.rac_command = toRACCommand(action)
     }
     
-    private var mySignal: RACSignal!
+    fileprivate var mySignal: RACSignal!
     
-    private func setupGeneratedTemplate() {
+    fileprivate func setupGeneratedTemplate() {
         
         //sources
         let name = self.nameTextField.rac_text
@@ -420,7 +420,7 @@ class BuildTemplateViewController: ConfigEditViewController, NSTableViewDataSour
         self.generatedTemplate <~ generated
     }
     
-    func fetchDevices(platform: DevicePlatform.PlatformType, completion: () -> ()) {
+    func fetchDevices(_ platform: DevicePlatform.PlatformType, completion: () -> ()) {
         
         SignalProducer<[Device], NSError> { [weak self] sink, _ in
             guard let sself = self else { return }
@@ -445,7 +445,7 @@ class BuildTemplateViewController: ConfigEditViewController, NSTableViewDataSour
                 }))
     }
     
-    private static func processReceivedDevices(devices: [Device], platform: DevicePlatform.PlatformType) -> [Device] {
+    fileprivate static func processReceivedDevices(_ devices: [Device], platform: DevicePlatform.PlatformType) -> [Device] {
         
         let allowedPlatforms: Set<DevicePlatform.PlatformType>
         switch platform {
@@ -508,7 +508,7 @@ class BuildTemplateViewController: ConfigEditViewController, NSTableViewDataSour
         return sortedDevices
     }
     
-    override func prepareForSegue(segue: NSStoryboardSegue, sender: AnyObject?) {
+    override func prepare(for segue: NSStoryboardSegue, sender: Any?) {
         let destinationController = segue.destinationController as! NSViewController
         
         if let triggerViewController = destinationController as? TriggerViewController {
@@ -520,10 +520,10 @@ class BuildTemplateViewController: ConfigEditViewController, NSTableViewDataSour
             self.triggerToEdit = nil
         }
         
-        super.prepareForSegue(segue, sender: sender)
+        super.prepare(for: segue, sender: sender)
     }
 
-    @IBAction func addTriggerButtonClicked(sender: AnyObject) {
+    @IBAction func addTriggerButtonClicked(_ sender: AnyObject) {
         self.editTrigger(nil)
     }
     
@@ -551,7 +551,7 @@ class BuildTemplateViewController: ConfigEditViewController, NSTableViewDataSour
     }
     
     //MARK: triggers table view
-    func numberOfRowsInTableView(tableView: NSTableView) -> Int {
+    func numberOfRows(in tableView: NSTableView) -> Int {
         
         if tableView == self.triggersTableView {
             return self.triggers.value.count
@@ -561,7 +561,7 @@ class BuildTemplateViewController: ConfigEditViewController, NSTableViewDataSour
         return 0
     }
     
-    func tableView(tableView: NSTableView, objectValueForTableColumn tableColumn: NSTableColumn?, row: Int) -> AnyObject? {
+    func tableView(_ tableView: NSTableView, objectValueFor tableColumn: NSTableColumn?, row: Int) -> Any? {
         if tableView == self.triggersTableView {
             let triggers = self.triggers.value
             if tableColumn!.identifier == "names" {
@@ -591,25 +591,25 @@ class BuildTemplateViewController: ConfigEditViewController, NSTableViewDataSour
         return nil
     }
     
-    func editTrigger(trigger: TriggerConfig?) {
+    func editTrigger(_ trigger: TriggerConfig?) {
         self.triggerToEdit = trigger
-        self.performSegueWithIdentifier("showTrigger", sender: nil)
+        self.performSegue(withIdentifier: "showTrigger", sender: nil)
     }
     
-    @IBAction func triggerTableViewEditTapped(sender: AnyObject) {
+    @IBAction func triggerTableViewEditTapped(_ sender: AnyObject) {
         let index = self.triggersTableView.selectedRow
         let trigger = self.triggers.value[index]
         self.editTrigger(trigger)
     }
     
-    @IBAction func triggerTableViewDeleteTapped(sender: AnyObject) {
+    @IBAction func triggerTableViewDeleteTapped(_ sender: AnyObject) {
         let index = self.triggersTableView.selectedRow
         let trigger = self.triggers.value[index]
         self.storageManager.removeTriggerConfig(trigger)
         self.triggers.value.removeAtIndex(index)
     }
     
-    @IBAction func testDevicesTableViewRowCheckboxTapped(sender: AnyObject) {
+    @IBAction func testDevicesTableViewRowCheckboxTapped(_ sender: AnyObject) {
         
         //toggle selection in model and reload data
         
@@ -631,11 +631,11 @@ class BuildTemplateViewController: ConfigEditViewController, NSTableViewDataSour
 
 extension BuildTemplateViewController: TriggerViewControllerDelegate {
     
-    func triggerViewControllerDidCancelEditingTrigger(trigger: TriggerConfig) {
+    func triggerViewControllerDidCancelEditingTrigger(_ trigger: TriggerConfig) {
         //nothing to do
     }
     
-    func triggerViewControllerDidSaveTrigger(trigger: TriggerConfig) {
+    func triggerViewControllerDidSaveTrigger(_ trigger: TriggerConfig) {
         var mapped = self.triggers.value.dictionarifyWithKey { $0.id }
         mapped[trigger.id] = trigger
         self.triggers.value = Array(mapped.values)
@@ -644,7 +644,7 @@ extension BuildTemplateViewController: TriggerViewControllerDelegate {
 
 extension BuildTemplateViewController {
     
-    private func allSchedules() -> [BotSchedule.Schedule] {
+    fileprivate func allSchedules() -> [BotSchedule.Schedule] {
         //scheduled not yet supported, just manual vs commit
         return [
             BotSchedule.Schedule.Manual,
@@ -653,7 +653,7 @@ extension BuildTemplateViewController {
         ]
     }
     
-    private func allCleaningPolicies() -> [BotConfiguration.CleaningPolicy] {
+    fileprivate func allCleaningPolicies() -> [BotConfiguration.CleaningPolicy] {
         return [
             BotConfiguration.CleaningPolicy.Never,
             BotConfiguration.CleaningPolicy.Always,
@@ -662,7 +662,7 @@ extension BuildTemplateViewController {
         ]
     }
     
-    private static func allDeviceFilters(platform: DevicePlatform.PlatformType) -> [DeviceFilter.FilterType] {
+    fileprivate static func allDeviceFilters(_ platform: DevicePlatform.PlatformType) -> [DeviceFilter.FilterType] {
         let allFilters = DeviceFilter.FilterType.availableFiltersForPlatform(platform)
         return allFilters
     }

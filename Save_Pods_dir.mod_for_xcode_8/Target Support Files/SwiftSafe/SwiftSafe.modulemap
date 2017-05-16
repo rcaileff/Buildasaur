@@ -1,0 +1,6 @@
+framework module SwiftSafe {
+  umbrella header "SwiftSafe-umbrella.h"
+
+  export *
+  module * { export * }
+}

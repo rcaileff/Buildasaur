@@ -64,19 +64,19 @@ class BitBucketStatus: BitBucketEntity, StatusType {
 
 extension BitBucketStatus.BitBucketState {
     
-    static func fromBuildState(state: BuildState) -> BitBucketStatus.BitBucketState {
+    static func fromBuildState(_ state: BuildState) -> BitBucketStatus.BitBucketState {
         switch state {
-        case .Success, .NoState: return .Success
-        case .Pending: return .InProgress
-        case .Error, .Failure: return .Failed
+        case .success, .noState: return .Success
+        case .pending: return .InProgress
+        case .error, .failure: return .Failed
         }
     }
     
     func toBuildState() -> BuildState {
         switch self {
-        case .Success: return .Success
-        case .InProgress: return .Pending
-        case .Failed: return .Failure
+        case .Success: return .success
+        case .InProgress: return .pending
+        case .Failed: return .failure
         }
     }
 }

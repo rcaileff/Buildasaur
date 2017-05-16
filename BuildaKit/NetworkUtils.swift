@@ -11,11 +11,11 @@ import BuildaGitServer
 import BuildaUtils
 import XcodeServerSDK
 
-public class NetworkUtils {
+open class NetworkUtils {
     
-    public typealias VerificationCompletion = (Bool, ErrorType?) -> ()
+    public typealias VerificationCompletion = (Bool, Error?) -> ()
     
-    public class func checkAvailabilityOfServiceWithProject(project: Project, completion: VerificationCompletion) {
+    open class func checkAvailabilityOfServiceWithProject(_ project: Project, completion: @escaping VerificationCompletion) {
         
         self.checkService(project, completion: { success, error in
             
@@ -40,7 +40,7 @@ public class NetworkUtils {
         })
     }
     
-    private class func checkService(project: Project, completion: VerificationCompletion) {
+    fileprivate class func checkService(_ project: Project, completion: @escaping VerificationCompletion) {
         
         let auth = project.config.value.serverAuthentication
         let service = auth!.service
@@ -81,7 +81,7 @@ public class NetworkUtils {
         })
     }
     
-    public class func checkAvailabilityOfXcodeServerWithCurrentSettings(config: XcodeServerConfig, completion: (Bool, NSError?) -> ()) {
+    open class func checkAvailabilityOfXcodeServerWithCurrentSettings(_ config: XcodeServerConfig, completion: @escaping (Bool, NSError?) -> ()) {
         
         let xcodeServer = XcodeServerFactory.server(config)
         
@@ -106,7 +106,7 @@ public class NetworkUtils {
         }
     }
     
-    class func checkValidityOfSSHKeys(blueprint: SourceControlBlueprint, completion: (Bool, NSError?) -> ()) {
+    class func checkValidityOfSSHKeys(_ blueprint: SourceControlBlueprint, completion: (Bool, NSError?) -> ()) {
         
         let blueprintDict = blueprint.dictionarify()
         let r = SSHKeyVerification.verifyBlueprint(blueprintDict)

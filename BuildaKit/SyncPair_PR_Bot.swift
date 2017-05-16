@@ -11,11 +11,11 @@ import XcodeServerSDK
 import BuildaGitServer
 import BuildaUtils
 
-public class SyncPair_PR_Bot: SyncPair {
+open class SyncPair_PR_Bot: SyncPair {
     
     let pr: PullRequestType
     let bot: Bot
-    public let resolver: SyncPairPRResolver
+    open let resolver: SyncPairPRResolver
     
     public init(pr: PullRequestType, bot: Bot, resolver: SyncPairPRResolver) {
         self.pr = pr
@@ -24,7 +24,7 @@ public class SyncPair_PR_Bot: SyncPair {
         super.init()
     }
     
-    override func sync(completion: Completion) {
+    override func sync(_ completion: @escaping Completion) {
         
         //sync the PR with the Bot
         self.syncPRWithBot(completion)
@@ -36,7 +36,7 @@ public class SyncPair_PR_Bot: SyncPair {
     
     //MARK: Internal
     
-    private func syncPRWithBot(completion: Completion) {
+    fileprivate func syncPRWithBot(_ completion: @escaping Completion) {
         
         let syncer = self.syncer
         let bot = self.bot
@@ -91,7 +91,7 @@ public class SyncPair_PR_Bot: SyncPair {
         })
     }
     
-    private func isBotEnabled(integrations integrations: [Integration], completion: (isEnabled: Bool, error: NSError?) -> ()) {
+    fileprivate func isBotEnabled(integrations: [Integration], completion: @escaping (_ isEnabled: Bool, _ error: NSError?) -> ()) {
         
         //bot is enabled if (there are any integrations) OR (there is a recent comment with a keyword to enable the bot in the pull request's conversation)
         //which means that there are two ways of enabling a bot.
@@ -99,7 +99,7 @@ public class SyncPair_PR_Bot: SyncPair {
         //b) (optional) comment an agreed keyword in the Pull Request, e.g. "lttm" - 'looks testable to me' is a frequent one
         
         if integrations.count > 0 || !self.syncer._waitForLttm {
-            completion(isEnabled: true, error: nil)
+            completion(true, nil)
             return
         }
         
@@ -124,7 +124,7 @@ public class SyncPair_PR_Bot: SyncPair {
             }
             
         } else {
-            completion(isEnabled: false, error: Error.withInfo("No repo name, cannot find the GitHub repo!"))
+            completion(false, Error.withInfo("No repo name, cannot find the GitHub repo!"))
         }
     }
 }

@@ -27,11 +27,11 @@ class ServiceAuthenticator {
     
     init() {}
     
-    func handleUrl(url: NSURL) {
+    func handleUrl(_ url: URL) {
         OAuthSwift.handleOpenURL(url)
     }
     
-    func getAccess(service: GitService, completion: (auth: ProjectAuthenticator?, error: ErrorType?) -> ()) {
+    func getAccess(_ service: GitService, completion: (_ auth: ProjectAuthenticator?, _ error: ErrorType?) -> ()) {
         
         let (params, secretFromResponseParams) = self.paramsForService(service)
         
@@ -43,7 +43,7 @@ class ServiceAuthenticator {
             responseType: params[.ResponseType]!
         )
         oauth.authorizeWithCallbackURL(
-            NSURL(string: params[.CallbackUrl]!)!,
+            URL(string: params[.CallbackUrl]!)!,
             scope: params[.Scope]!,
             state: params[.State]!,
             success: { credential, response, parameters in
@@ -58,11 +58,11 @@ class ServiceAuthenticator {
         )
     }
     
-    func getAccessTokenFromRefresh(service: GitService, refreshToken: String, completion: (auth: ProjectAuthenticator?, error: ErrorType?)) {
+    func getAccessTokenFromRefresh(_ service: GitService, refreshToken: String, completion: (auth: ProjectAuthenticator?, error: ErrorType?)) {
         //TODO: implement refresh token flow - to get and save a new access token
     }
     
-    private func paramsForService(service: GitService) -> ([ParamKey: String], SecretFromResponseParams) {
+    fileprivate func paramsForService(_ service: GitService) -> ([ParamKey: String], SecretFromResponseParams) {
         switch service {
         case .GitHub:
             return self.getGitHubParameters()
@@ -75,7 +75,7 @@ class ServiceAuthenticator {
         }
     }
     
-    private func getGitHubParameters() -> ([ParamKey: String], SecretFromResponseParams) {
+    fileprivate func getGitHubParameters() -> ([ParamKey: String], SecretFromResponseParams) {
         let service = GitService.GitHub
         let params: [ParamKey: String] = [
             .ConsumerId: service.serviceKey(),
@@ -94,7 +94,7 @@ class ServiceAuthenticator {
         return (params, secret)
     }
     
-    private func getBitBucketParameters() -> ([ParamKey: String], SecretFromResponseParams) {
+    fileprivate func getBitBucketParameters() -> ([ParamKey: String], SecretFromResponseParams) {
         let service = GitService.BitBucket
         let params: [ParamKey: String] = [
             .ConsumerId: service.serviceKey(),

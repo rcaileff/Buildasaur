@@ -13,7 +13,7 @@ import Result
 
 struct SyncerStatePresenter {
     
-    static func stringForState(state: SyncerEventType, active: Bool) -> String {
+    static func stringForState(_ state: SyncerEventType, active: Bool) -> String {
         
         guard active else {
             return "🚧 stopped"

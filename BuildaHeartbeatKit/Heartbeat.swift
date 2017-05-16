@@ -15,27 +15,27 @@ public protocol HeartbeatManagerDelegate {
 }
 
 //READ: https://github.com/czechboy0/Buildasaur/tree/master#heartpulse-heartbeat
-@objc public class HeartbeatManager: NSObject {
+@objc open class HeartbeatManager: NSObject {
     
-    public var delegate: HeartbeatManagerDelegate?
+    open var delegate: HeartbeatManagerDelegate?
     
-    private let client: EkgClient
-    private let creationTime: Double
-    private var timer: NSTimer?
-    private var initialTimer: NSTimer?
-    private let interval: Double = 24 * 60 * 60 //send heartbeat once in 24 hours
+    fileprivate let client: EkgClient
+    fileprivate let creationTime: Double
+    fileprivate var timer: Timer?
+    fileprivate var initialTimer: Timer?
+    fileprivate let interval: Double = 24 * 60 * 60 //send heartbeat once in 24 hours
     
     public init(server: String) {
-        let bundle = NSBundle.mainBundle()
+        let bundle = Bundle.main
         let appIdentifier = EkgClientHelper.pullAppIdentifierFromBundle(bundle) ?? "Unknown app"
         let version = EkgClientHelper.pullVersionFromBundle(bundle) ?? "?"
         let buildNumber = EkgClientHelper.pullBuildNumberFromBundle(bundle) ?? "?"
         let appInfo = AppInfo(appIdentifier: appIdentifier, version: version, build: buildNumber)
-        let host = NSURL(string: server)!
+        let host = URL(string: server)!
         let serverInfo = ServerInfo(host: host)
-        let userDefaults = NSUserDefaults.standardUserDefaults()
+        let userDefaults = UserDefaults.standard
         
-        self.creationTime = NSDate().timeIntervalSince1970
+        self.creationTime = Date().timeIntervalSince1970
         let client = EkgClient(userDefaults: userDefaults, appInfo: appInfo, serverInfo: serverInfo)
         self.client = client
     }
@@ -44,20 +44,20 @@ public protocol HeartbeatManagerDelegate {
         self.stop()
     }
     
-    public func start() {
+    open func start() {
         self.sendLaunchedEvent()
         self.startSendingHeartbeat()
     }
     
-    public func stop() {
+    open func stop() {
         self.stopSendingHeartbeat()
     }
     
-    public func willInstallSparkleUpdate() {
+    open func willInstallSparkleUpdate() {
         self.sendEvent(UpdateEvent())
     }
     
-    private func sendEvent(event: Event) {
+    fileprivate func sendEvent(_ event: Event) {
         
         Log.info("Sending heartbeat event \(event.jsonify())")
         
@@ -68,46 +68,46 @@ public protocol HeartbeatManagerDelegate {
         }
     }
     
-    private func sendLaunchedEvent() {
+    fileprivate func sendLaunchedEvent() {
         self.sendEvent(LaunchEvent())
     }
     
-    private func sendHeartbeatEvent() {
-        let uptime = NSDate().timeIntervalSince1970 - self.creationTime
+    fileprivate func sendHeartbeatEvent() {
+        let uptime = Date().timeIntervalSince1970 - self.creationTime
         let typesOfRunningSyncers = self.delegate?.typesOfRunningSyncers() ?? [:]
         self.sendEvent(HeartbeatEvent(uptime: uptime, typesOfRunningSyncers: typesOfRunningSyncers))
     }
     
-    func _timerFired(timer: NSTimer?=nil) {
+    func _timerFired(_ timer: Timer?=nil) {
         self.sendHeartbeatEvent()
         
-        if let initialTimer = self.initialTimer where initialTimer.valid {
+        if let initialTimer = self.initialTimer, initialTimer.isValid {
             initialTimer.invalidate()
             self.initialTimer = nil
         }
     }
     
-    private func startSendingHeartbeat() {
+    fileprivate func startSendingHeartbeat() {
         
         //send once in 10 seconds to give builda a chance to init and start
         self.initialTimer?.invalidate()
-        self.initialTimer = NSTimer.scheduledTimerWithTimeInterval(
-            20,
+        self.initialTimer = Timer.scheduledTimer(
+            timeInterval: 20,
             target: self,
             selector: #selector(_timerFired(_:)),
             userInfo: nil,
             repeats: false)
         
         self.timer?.invalidate()
-        self.timer = NSTimer.scheduledTimerWithTimeInterval(
-            self.interval,
+        self.timer = Timer.scheduledTimer(
+            timeInterval: self.interval,
             target: self,
             selector: #selector(_timerFired(_:)),
             userInfo: nil,
             repeats: true)
     }
     
-    private func stopSendingHeartbeat() {
+    fileprivate func stopSendingHeartbeat() {
         self.timer?.invalidate()
     }
 }

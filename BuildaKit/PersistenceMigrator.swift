@@ -32,9 +32,9 @@ extension MigratorType {
     }
 }
 
-public class CompositeMigrator: MigratorType {
+open class CompositeMigrator: MigratorType {
     
-    public var persistence: Persistence {
+    open var persistence: Persistence {
         get {
             preconditionFailure("No persistence here")
         }
@@ -54,17 +54,17 @@ public class CompositeMigrator: MigratorType {
         ]
     }
     
-    public func isMigrationRequired() -> Bool {
+    open func isMigrationRequired() -> Bool {
         return self.childMigrators.filter { $0.isMigrationRequired() }.count > 0
     }
     
-    public func attemptMigration() throws {
+    open func attemptMigration() throws {
         
         //if we find a required migration, we need to also run all
         //the ones that come after it
-        for (idx, mig) in self.childMigrators.enumerate() {
+        for (idx, mig) in self.childMigrators.enumerated() {
             if mig.isMigrationRequired() {
-                let toRun = self.childMigrators.suffixFrom(idx)
+                let toRun = self.childMigrators.suffix(from: idx)
                 print("Performing \(toRun.count) migrations")
                 try toRun.forEach { try $0.attemptMigration() }
                 break
@@ -143,9 +143,9 @@ class Migrator_v1_v2: MigratorType {
         self.migrateConfigAndLog()
     }
     
-    func fixPath(path: String) -> String {
-        let oldUrl = NSURL(string: path)
-        let newPath = oldUrl!.path!
+    func fixPath(_ path: String) -> String {
+        let oldUrl = URL(string: path)
+        let newPath = oldUrl!.path
         return newPath
     }
     
@@ -172,7 +172,7 @@ class Migrator_v1_v2: MigratorType {
             }
             
             //add them to the big list of triggers that we'll save later
-            triggers.appendContentsOf(trigWithIds)
+            triggers.append(contentsOf: trigWithIds)
             
             //now gather those ids
             let triggerIds = trigWithIds.map { $0.stringForKey("id") }
@@ -188,7 +188,7 @@ class Migrator_v1_v2: MigratorType {
         self.persistence.saveArrayIntoFolder("BuildTemplates", items: mutableTemplates, itemFileName: { $0.stringForKey("id") }, serialize: { $0 })
     }
     
-    func migrateSyncers(server: RefType?, project: RefType?, template: RefType?) {
+    func migrateSyncers(_ server: RefType?, project: RefType?, template: RefType?) {
         
         let syncers = self.persistence.loadArrayOfDictionariesFromFile("Syncers.json") ?? []
         let mutableSyncers = syncers.map { $0.mutableCopy() as! NSMutableDictionary }
@@ -201,8 +201,8 @@ class Migrator_v1_v2: MigratorType {
         
         //remove server host and project path and add new ids
         let updated = withIds.map { syncer -> NSMutableDictionary in
-            syncer.removeObjectForKey("server_host")
-            syncer.removeObjectForKey("project_path")
+            syncer.removeObject(forKey: "server_host")
+            syncer.removeObject(forKey: "project_path")
             syncer.optionallyAddValueForKey(server, key: "server_ref")
             syncer.optionallyAddValueForKey(project, key: "project_ref")
             syncer.optionallyAddValueForKey(template, key: "preferred_template_ref")
@@ -234,7 +234,7 @@ class Migrator_v1_v2: MigratorType {
         //remove preferred_template_id, will be moved to syncer
         let removedTemplate = withFixedUrls.map { project -> (RefType?, NSMutableDictionary) in
             let template = project["preferred_template_id"] as? RefType
-            project.removeObjectForKey("preferred_template_id")
+            project.removeObject(forKey: "preferred_template_id")
             return (template, project)
         }
         
@@ -338,8 +338,8 @@ class Migrator_v2_v3: MigratorType {
             let formattedToken = auth.toString()
 
             let passphrase = d.optionalStringForKey("ssh_passphrase")
-            d.removeObjectForKey("github_token")
-            d.removeObjectForKey("ssh_passphrase")
+            d.removeObject(forKey: "github_token")
+            d.removeObject(forKey: "ssh_passphrase")
             
             let tokenKeychain = SecurePersistence.sourceServerTokenKeychain()
             tokenKeychain.writeIfNeeded(id, value: formattedToken)
@@ -371,7 +371,7 @@ class Migrator_v2_v3: MigratorType {
             let keychain = SecurePersistence.xcodeServerPasswordKeychain()
             keychain.writeIfNeeded(key, value: password)
             
-            d.removeObjectForKey("password")
+            d.removeObject(forKey: "password")
             
             precondition(keychain.read(key) == password, "Saved password must match")
             
@@ -384,7 +384,7 @@ class Migrator_v2_v3: MigratorType {
     func migrateLogs() {
         
         let pers = self.persistence
-        (pers.filesInFolder(pers.folderForIntention(.Reading)) ?? [])
+        (pers.filesInFolder(pers.folderForIntention(.reading)) ?? [])
             .map { $0.lastPathComponent ?? "" }
             .filter { $0.hasSuffix("log") }
             .forEach {

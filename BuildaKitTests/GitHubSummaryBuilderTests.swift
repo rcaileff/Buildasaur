@@ -16,7 +16,7 @@ class GitHubSummaryBuilderTests: XCTestCase {
     
     //MARK: utils
     
-    func integration(result: Integration.Result, buildResultSummary: BuildResultSummary) -> Integration {
+    func integration(_ result: Integration.Result, buildResultSummary: BuildResultSummary) -> Integration {
         let integration = MockIntegration(number: 15, step: .Completed, result: result, buildResultSummary: buildResultSummary)
         return integration
     }

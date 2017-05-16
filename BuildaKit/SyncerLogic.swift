@@ -42,7 +42,7 @@ extension StandardSyncer {
         return self._project.serviceRepoName()
     }
         
-    internal func syncRepoWithName(repoName: String, completion: () -> ()) {
+    internal func syncRepoWithName(_ repoName: String, completion: @escaping () -> ()) {
         
         self._sourceServer.getRepo(repoName, completion: { (repo, error) -> () in
             
@@ -63,7 +63,7 @@ extension StandardSyncer {
         })
     }
     
-    private func syncRepoWithNameAndMetadata(repoName: String, repo: RepoType, completion: () -> ()) {
+    fileprivate func syncRepoWithNameAndMetadata(_ repoName: String, repo: RepoType, completion: @escaping () -> ()) {
         
         //pull PRs from source server
         self._sourceServer.getOpenPullRequests(repoName, completion: { (prs, error) -> () in
@@ -87,7 +87,7 @@ extension StandardSyncer {
         })
     }
     
-    private func syncRepoWithPRs(repoName: String, repo: RepoType, prs: [PullRequestType], completion: () -> ()) {
+    fileprivate func syncRepoWithPRs(_ repoName: String, repo: RepoType, prs: [PullRequestType], completion: @escaping () -> ()) {
         
         //only fetch branches if there are any watched ones. there might be tens or hundreds of branches
         //so we don't want to fetch them unless user actually is watching any non-PR branches.
@@ -118,7 +118,7 @@ extension StandardSyncer {
         }
     }
     
-    private func syncRepoWithPRsAndBranches(repoName: String, repo: RepoType, prs: [PullRequestType], branches: [BranchType], completion: () -> ()) {
+    fileprivate func syncRepoWithPRsAndBranches(_ repoName: String, repo: RepoType, prs: [PullRequestType], branches: [BranchType], completion: @escaping () -> ()) {
         
         //we have branches, now fetch bots
         self._xcodeServer.getBots({ (bots, error) -> () in
@@ -154,7 +154,7 @@ extension StandardSyncer {
         })
     }
     
-    public func syncPRsAndBranchesAndBots(repo repo: RepoType, repoName: String, prs: [PullRequestType], branches: [BranchType], bots: [Bot], completion: () -> ()) {
+    public func syncPRsAndBranchesAndBots(repo: RepoType, repoName: String, prs: [PullRequestType], branches: [BranchType], bots: [Bot], completion: () -> ()) {
         
         let prsDescription = prs.map { (pr: PullRequestType) -> String in
             "    PR \(pr.number): \(pr.title) [\(pr.headName) -> \(pr.baseName)]"
@@ -176,7 +176,7 @@ extension StandardSyncer {
     }
     
     public func resolvePRsAndBranchesAndBots(
-        repoName repoName: String,
+        repoName: String,
         prs: [PullRequestType],
         branches: [BranchType],
         bots: [Bot])
@@ -258,7 +258,7 @@ extension StandardSyncer {
             return (prsToSync, prBotsToCreate, branchesToSync, branchBotsToCreate, botsToDelete)
     }
     
-    public func createSyncPairsFrom(repo repo: RepoType, botActions: BotActions) -> [SyncPair] {
+    public func createSyncPairsFrom(repo: RepoType, botActions: BotActions) -> [SyncPair] {
         
         //create sync pairs for each action needed
         let syncPRBotSyncPairs = botActions.prsToSync.map({
@@ -300,20 +300,20 @@ extension StandardSyncer {
         return syncPairs
     }
     
-    private func applyResolvedSyncPairs(syncPairs: [SyncPair], completion: () -> ()) {
+    fileprivate func applyResolvedSyncPairs(_ syncPairs: [SyncPair], completion: @escaping () -> ()) {
         
         //actually kick the sync pairs off
-        let group = dispatch_group_create()
+        let group = DispatchGroup()
         for i in syncPairs {
-            dispatch_group_enter(group)
+            group.enter()
             i.start({ (error) -> () in
                 if let error = error {
                     self.notifyError(error, context: "SyncPair: \(i.syncPairName())")
                 }
-                dispatch_group_leave(group)
+                group.leave()
             })
         }
         
-        dispatch_group_notify(group, dispatch_get_main_queue(), completion)
+        group.notify(queue: DispatchQueue.main, execute: completion)
     }
 }

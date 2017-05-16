@@ -14,7 +14,7 @@ import ReactiveCocoa
 import Result
 
 protocol EmptyXcodeServerViewControllerDelegate: class {
-    func didSelectXcodeServerConfig(config: XcodeServerConfig)
+    func didSelectXcodeServerConfig(_ config: XcodeServerConfig)
 }
 
 class EmptyXcodeServerViewController: EditableViewController {
@@ -27,8 +27,8 @@ class EmptyXcodeServerViewController: EditableViewController {
     
     @IBOutlet weak var existingXcodeServersPopup: NSPopUpButton!
 
-    private var xcodeServerConfigs: [XcodeServerConfig] = []
-    private var selectedConfig = MutableProperty<XcodeServerConfig?>(nil)
+    fileprivate var xcodeServerConfigs: [XcodeServerConfig] = []
+    fileprivate var selectedConfig = MutableProperty<XcodeServerConfig?>(nil)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -62,12 +62,12 @@ class EmptyXcodeServerViewController: EditableViewController {
         return super.shouldGoNext()
     }
     
-    private func setupEditableStates() {
+    fileprivate func setupEditableStates() {
         
         self.nextAllowed <~ self.selectedConfig.producer.map { $0 != nil }
     }
     
-    private func selectItemAtIndex(index: Int) {
+    fileprivate func selectItemAtIndex(_ index: Int) {
         
         let configs = self.xcodeServerConfigs
         
@@ -76,7 +76,7 @@ class EmptyXcodeServerViewController: EditableViewController {
         self.selectedConfig.value = config
     }
     
-    private func setupPopupAction() {
+    fileprivate func setupPopupAction() {
         
         let handler = SignalProducer<AnyObject, NoError> { [weak self] sink, _ in
             if let sself = self {
@@ -89,7 +89,7 @@ class EmptyXcodeServerViewController: EditableViewController {
         self.existingXcodeServersPopup.rac_command = toRACCommand(action)
     }
     
-    private func setupDataSource() {
+    fileprivate func setupDataSource() {
 
         let configsProducer = self.storageManager.serverConfigs.producer
         let allConfigsProducer = configsProducer
@@ -107,7 +107,7 @@ class EmptyXcodeServerViewController: EditableViewController {
         }
     }
     
-    private func didSelectXcodeServer(config: XcodeServerConfig) {
+    fileprivate func didSelectXcodeServer(_ config: XcodeServerConfig) {
         Log.verbose("Selected \(config.host)")
         self.emptyServerDelegate?.didSelectXcodeServerConfig(config)
     }

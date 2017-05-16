@@ -13,7 +13,7 @@ struct GitHubRateLimit {
     let resetTime: Double
     let limit: Int
     let remaining: Int
-    let now: Double = NSDate().timeIntervalSince1970
+    let now: Double = Date().timeIntervalSince1970
     
     func getReport() -> String {
         

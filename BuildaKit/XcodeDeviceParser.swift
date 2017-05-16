@@ -10,7 +10,7 @@ import Foundation
 import XcodeServerSDK
 import BuildaUtils
 
-public class XcodeDeviceParser {
+open class XcodeDeviceParser {
     
     public enum DeviceType: String {
         case iPhoneOS = "iphoneos"
@@ -32,7 +32,7 @@ public class XcodeDeviceParser {
         }
     }
     
-    public class func parseDeviceTypeFromProjectUrlAndScheme(projectUrl: NSURL, scheme: XcodeScheme) throws -> DeviceType {
+    open class func parseDeviceTypeFromProjectUrlAndScheme(_ projectUrl: URL, scheme: XcodeScheme) throws -> DeviceType {
         
         let typeString = try self.parseTargetTypeFromSchemeAndProjectAtUrl(scheme, projectFolderUrl: projectUrl)
         guard let deviceType = DeviceType(rawValue: typeString) else {
@@ -41,7 +41,7 @@ public class XcodeDeviceParser {
         return deviceType
     }
     
-    private class func parseTargetTypeFromSchemeAndProjectAtUrl(scheme: XcodeScheme, projectFolderUrl: NSURL) throws -> String {
+    fileprivate class func parseTargetTypeFromSchemeAndProjectAtUrl(_ scheme: XcodeScheme, projectFolderUrl: URL) throws -> String {
         
         let ownerArgs = try { () throws -> String in
             
@@ -55,7 +55,7 @@ public class XcodeDeviceParser {
             }
             }()
         
-        let folder = projectFolderUrl.URLByDeletingLastPathComponent?.path ?? "~"
+        let folder = projectFolderUrl.deletingLastPathComponent().path ?? "~"
         let schemeName = scheme.name
         
         let script = "cd \"\(folder)\"; xcodebuild \(ownerArgs) -scheme \"\(schemeName)\" -showBuildSettings 2>/dev/null | egrep '^\\s*PLATFORM_NAME' | cut -d = -f 2 | uniq | xargs echo"

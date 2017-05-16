@@ -13,7 +13,7 @@ import XcodeServerSDK
 
 class SyncerProducerFactory {
     
-    static func createTripletsProducer(st: StorageManager) -> SignalProducer<[ConfigTriplet], NoError> {
+    static func createTripletsProducer(_ st: StorageManager) -> SignalProducer<[ConfigTriplet], NoError> {
         
         let projectConfigs = st.projectConfigs.producer
         let serverConfigs = st.serverConfigs.producer
@@ -69,7 +69,7 @@ class SyncerProducerFactory {
         return triplets
     }
     
-    static func createSyncersProducer(factory: SyncerFactoryType, triplets: SignalProducer<[ConfigTriplet], NoError>) -> SignalProducer<[StandardSyncer], NoError> {
+    static func createSyncersProducer(_ factory: SyncerFactoryType, triplets: SignalProducer<[ConfigTriplet], NoError>) -> SignalProducer<[StandardSyncer], NoError> {
         
         let syncers = triplets.map { (tripletArray: [ConfigTriplet]) -> [StandardSyncer] in
             return factory.createSyncers(tripletArray)
@@ -77,7 +77,7 @@ class SyncerProducerFactory {
         return syncers
     }
     
-    static func createProjectsProducer(factory: SyncerFactoryType, configs: SignalProducer<[ProjectConfig], NoError>) -> SignalProducer<[Project], NoError> {
+    static func createProjectsProducer(_ factory: SyncerFactoryType, configs: SignalProducer<[ProjectConfig], NoError>) -> SignalProducer<[Project], NoError> {
         
         let projects = configs.map { configsArray in
             return configsArray.map { factory.createProject($0) }
@@ -85,7 +85,7 @@ class SyncerProducerFactory {
         return projects
     }
     
-    static func createServersProducer(factory: SyncerFactoryType, configs: SignalProducer<[XcodeServerConfig], NoError>) -> SignalProducer<[XcodeServer], NoError> {
+    static func createServersProducer(_ factory: SyncerFactoryType, configs: SignalProducer<[XcodeServerConfig], NoError>) -> SignalProducer<[XcodeServer], NoError> {
         
         let servers = configs.map { configsArray in
             return configsArray.map { factory.createXcodeServer($0) }
@@ -98,7 +98,7 @@ class SyncerProducerFactory {
         return templates
     }
     
-    static func createTriggersProducer(factory: SyncerFactoryType, configs: SignalProducer<[TriggerConfig], NoError>) -> SignalProducer<[Trigger], NoError> {
+    static func createTriggersProducer(_ factory: SyncerFactoryType, configs: SignalProducer<[TriggerConfig], NoError>) -> SignalProducer<[Trigger], NoError> {
         
         let triggers = configs.map { configsArray in
             return configsArray.map { factory.createTrigger($0) }

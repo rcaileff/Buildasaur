@@ -23,10 +23,10 @@ final class SecurePersistence {
         static let Prefix = "com.honzadvorsky.buildasaur.debug"
     #endif
     
-    private let keychain: Keychain
-    private let safe: Safe
+    fileprivate let keychain: Keychain
+    fileprivate let safe: Safe
     
-    private init(keychain: Keychain, safe: Safe = EREW()) {
+    fileprivate init(keychain: Keychain, safe: Safe = EREW()) {
         self.keychain = keychain
         self.safe = safe
     }
@@ -43,7 +43,7 @@ final class SecurePersistence {
         return self.keychain("\(Prefix).source_server.passphrase")
     }
     
-    static private func keychain(service: String) -> SecurePersistence {
+    static fileprivate func keychain(_ service: String) -> SecurePersistence {
         #if TESTING
         let keychain = NSMutableDictionary()
         #else
@@ -52,7 +52,7 @@ final class SecurePersistence {
         return self.init(keychain: keychain)
     }
     
-    func read(key: String) -> String? {
+    func read(_ key: String) -> String? {
         var val: String?
         self.safe.read {
             #if TESTING
@@ -78,13 +78,13 @@ final class SecurePersistence {
         return all
     }
     
-    func writeIfNeeded(key: String, value: String?) {
+    func writeIfNeeded(_ key: String, value: String?) {
         self.safe.write {
             self.updateIfNeeded(key, value: value)
         }
     }
     
-    private func updateIfNeeded(key: String, value: String?) {
+    fileprivate func updateIfNeeded(_ key: String, value: String?) {
         #if TESTING
             let existing = self.keychain[key] as? String
         #else

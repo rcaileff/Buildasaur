@@ -15,11 +15,11 @@ class BlueprintFileParser: SourceControlFileParser {
         return ["xcscmblueprint"]
     }
     
-    func parseFileAtUrl(url: NSURL) throws -> WorkspaceMetadata {
+    func parseFileAtUrl(_ url: URL) throws -> WorkspaceMetadata {
         
         //JSON -> NSDictionary
-        let data = try NSData(contentsOfURL: url, options: NSDataReadingOptions())
-        let jsonObject = try NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions())
+        let data = try Data(contentsOf: url, options: NSData.ReadingOptions())
+        let jsonObject = try JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions())
         guard let dictionary = jsonObject as? NSDictionary else { throw Error.withInfo("Failed to parse \(url)") }
         
         //parse our required keys

@@ -14,7 +14,7 @@ import ReactiveCocoa
 import Result
 
 protocol EmptyBuildTemplateViewControllerDelegate: class {
-    func didSelectBuildTemplate(buildTemplate: BuildTemplate)
+    func didSelectBuildTemplate(_ buildTemplate: BuildTemplate)
 }
 
 class EmptyBuildTemplateViewController: EditableViewController {
@@ -30,8 +30,8 @@ class EmptyBuildTemplateViewController: EditableViewController {
     
     @IBOutlet weak var existingBuildTemplatesPopup: NSPopUpButton!
     
-    private var buildTemplates: [BuildTemplate] = []
-    private var selectedTemplate = MutableProperty<BuildTemplate?>(nil)
+    fileprivate var buildTemplates: [BuildTemplate] = []
+    fileprivate var selectedTemplate = MutableProperty<BuildTemplate?>(nil)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -52,7 +52,7 @@ class EmptyBuildTemplateViewController: EditableViewController {
             index = 0
         }
         self.selectItemAtIndex(index)
-        self.existingBuildTemplatesPopup.selectItemAtIndex(index)
+        self.existingBuildTemplatesPopup.selectItem(at: index)
     }
 
     func addNewString() -> String {
@@ -68,12 +68,12 @@ class EmptyBuildTemplateViewController: EditableViewController {
         return super.shouldGoNext()
     }
     
-    private func setupEditableStates() {
+    fileprivate func setupEditableStates() {
         
         self.nextAllowed <~ self.selectedTemplate.producer.map { $0 != nil }
     }
     
-    private func selectItemAtIndex(index: Int) {
+    fileprivate func selectItemAtIndex(_ index: Int) {
         
         let templates = self.buildTemplates
         
@@ -82,7 +82,7 @@ class EmptyBuildTemplateViewController: EditableViewController {
         self.selectedTemplate.value = template
     }
     
-    private func setupPopupAction() {
+    fileprivate func setupPopupAction() {
         
         let handler = SignalProducer<AnyObject, NoError> { [weak self] sink, _ in
             if let sself = self {
@@ -95,7 +95,7 @@ class EmptyBuildTemplateViewController: EditableViewController {
         self.existingBuildTemplatesPopup.rac_command = toRACCommand(action)
     }
     
-    private func setupDataSource() {
+    fileprivate func setupDataSource() {
         
         let templatesProducer = self.storageManager
             .buildTemplatesForProjectName(self.projectName)
@@ -117,7 +117,7 @@ class EmptyBuildTemplateViewController: EditableViewController {
         }
     }
     
-    private func didSelectBuildTemplate(template: BuildTemplate) {
+    fileprivate func didSelectBuildTemplate(_ template: BuildTemplate) {
         Log.verbose("Selected \(template.name)")
         self.emptyTemplateDelegate?.didSelectBuildTemplate(template)
     }

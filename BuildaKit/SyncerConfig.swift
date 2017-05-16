@@ -18,7 +18,7 @@ public struct Ref {
             counter += 1
             return ref
         #else
-            return NSUUID().UUIDString
+            return UUID().uuidString
         #endif
     }
     
@@ -51,7 +51,7 @@ public struct SyncerConfig {
     public var xcodeServerRef: RefType
     
     public var postStatusComments: Bool
-    public var syncInterval: NSTimeInterval
+    public var syncInterval: TimeInterval
     public var waitForLttm: Bool
     public var watchedBranchNames: [String]
     
